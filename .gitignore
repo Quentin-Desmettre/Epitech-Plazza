@@ -1,0 +1,42 @@
+*.o
+a.out
+vgcore.*
+.vscode
+.idea
+tokens.txt
+logs.log
+__pycache__
+websockets
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+build
+
+__BINARY_NAME__
