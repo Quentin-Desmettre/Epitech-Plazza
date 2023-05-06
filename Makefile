@@ -9,29 +9,29 @@ rwildc = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildc,$d/,$2))
 
 SOURCEDIR = src
 
-SRC = $(call rwildc,$(SOURCEDIR),*__FILE_TYPE__)
+SRC = $(call rwildc,$(SOURCEDIR),*.cpp)
 
-__COMPILER_TYPE__ = __COMPILER__
+CXX = g++
 
-OBJ = $(SRC:__FILE_TYPE__=.o)
+OBJ = $(SRC:.cpp=.o)
 
-NAME = __BINARY_NAME__
+NAME = plazza
 
-__COMPILER_TYPE_FLAGS__ = __COMPILER_FLAGS__
+CXXFLAGS = -Wall -Wextra -I ./include -std=c++20 -lpthread
 
 all: $(NAME)
 
 $(NAME):   $(OBJ)
-	__COMPILER__ -o $(NAME) $(OBJ) $(__COMPILER_TYPE_FLAGS__)
+	g++ -o $(NAME) $(OBJ) $(CXXFLAGS)
 
 tests_run:
 	cd tests && make && ./tests
 
 clean:
 	rm -f $(OBJ)
-	find . -name "vgcore.*" -delete
-	find . -name "*~" -delete
-	find . -name "\#*" -delete
+	(find . -name "vgcore.*" -delete) || true
+	(find . -name "*~" -delete) || true
+	(find . -name "\#*" -delete) || true
 
 fclean:    clean
 	rm -f $(NAME)

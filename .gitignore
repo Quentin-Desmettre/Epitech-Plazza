@@ -7,6 +7,10 @@ tokens.txt
 logs.log
 __pycache__
 websockets
+vgcore.*
+*.gcda
+*.gcno
+*.gcov
 
 # Compiled Object files
 *.slo
@@ -39,4 +43,4 @@ websockets
 *.app
 build
 
-__BINARY_NAME__
+plazza
