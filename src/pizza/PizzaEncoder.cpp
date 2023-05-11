@@ -8,11 +8,6 @@
 #include <stdexcept>
 #include "pizza/PizzaEncoder.hpp"
 
-const char *PizzaEncoder::PacketTooSmall::what() const noexcept
-{
-    return "Packet is too small";
-}
-
 std::vector<char> PizzaEncoder::_2pac(const Pizza &pizza)
 {
     std::vector<char> data;
