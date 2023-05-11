@@ -6,4 +6,4 @@ set(CMAKE_CXX_STANDARD 20)
 include_directories(include)
 
 add_executable(Epitech_Plazza
-        src/main.cpp include/ProcessForker.hpp include/Reception.hpp src/pizza/Pizza.cpp include/pizza/Pizza.hpp src/pizza/PizzaFactory.cpp include/pizza/PizzaFactory.hpp src/pizza/PizzaEncoder.cpp include/pizza/PizzaEncoder.hpp src/ipc/PizzaIPC.cpp include/ipc/PizzaIPC.hpp src/ipc/InterProcessCom.cpp include/ipc/InterProcessCom.hpp include/Kitchen.hpp include/CookPool.hpp src/Kitchen.cpp src/Reception.cpp src/CookPool.cpp tests/Test_Pizza.cpp tests/Test_PizzaFactory.cpp tests/Test_pizzaEncoder.cpp)
+        src/main.cpp include/ProcessForker.hpp include/Reception.hpp src/pizza/Pizza.cpp include/pizza/Pizza.hpp src/pizza/PizzaFactory.cpp include/pizza/PizzaFactory.hpp src/pizza/PizzaEncoder.cpp include/pizza/PizzaEncoder.hpp src/ipc/PizzaIPC.cpp include/ipc/PizzaIPC.hpp src/ipc/InterProcessCom.cpp include/ipc/InterProcessCom.hpp include/Kitchen.hpp include/CookPool.hpp src/Kitchen.cpp src/Reception.cpp src/CookPool.cpp tests/Test_Pizza.cpp tests/Test_PizzaFactory.cpp tests/Test_pizzaEncoder.cpp tests/Test_IPC.cpp tests/Test_pizzaIPC.cpp)

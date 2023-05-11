@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <csignal>
 
-std::map<std::string, int> InterProcessCom::_pipes;
+std::vector<std::string> InterProcessCom::_pipes;
 
 InterProcessCom::InterProcessCom(): _fd(-1)
 {
@@ -22,36 +22,31 @@ InterProcessCom::InterProcessCom(): _fd(-1)
     do {
         int random = distribution(generator);
         _name = "/tmp/Plazza-fifo-" + std::to_string(random);
-    } while (_pipes.find(_name) != _pipes.end());
+    } while (std::find(_pipes.begin(), _pipes.end(), _name) != _pipes.end());
+    _pipes.push_back(_name);
 
     // Then, create and open the named pipe.
     if (mkfifo(_name.c_str(), 0666) == -1)
         throw std::runtime_error("Cannot create named pipe");
 }
 
+InterProcessCom::InterProcessCom(const InterProcessCom &other): _name(other._name), _fd(-1)
+{
+    _name = other._name;
+}
+
 InterProcessCom::~InterProcessCom()
 {
     close();
-
-    // Check if the named pipe is not used anymore.
-    if (_pipes[_name] == 0) {
-        unlink(_name.c_str());
-        _pipes.erase(_name);
-    }
 }
 
 void InterProcessCom::open(InterProcessCom::OpenMode mode)
 {
     if (_fd != -1)
-        return;
+        ::close(_fd);
     _fd = ::open(_name.c_str(), mode == READ ? O_RDONLY : O_WRONLY);
     if (_fd == -1)
         throw std::runtime_error("Cannot open named pipe");
-
-    // Increment the reference count of the named pipe.
-    if (_pipes.find(_name) == _pipes.end())
-        _pipes[_name] = 0;
-    _pipes[_name]++;
 }
 
 void InterProcessCom::close()
@@ -60,7 +55,6 @@ void InterProcessCom::close()
         return;
     ::close(_fd);
     _fd = -1;
-    _pipes[_name]--;
 }
 
 void InterProcessCom::write(const void *data, size_t size) const
