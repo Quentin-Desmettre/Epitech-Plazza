@@ -17,6 +17,7 @@
 #include "InterProcessCom.hpp"
 #include "pizza/Pizza.hpp"
 #include "Kitchen.hpp"
+#include "pizza/ParsePizza.hpp"
 
 /**
  * @brief Reception class
@@ -25,6 +26,7 @@
  * And handles the answers from the kitchen, and the timeout of kitchen
  */
 class Reception {
+public:
     Reception(int ac, char **av);
 
     /**
@@ -45,12 +47,13 @@ class Reception {
      * @return Empty vector if there is a parse error, else the pizzas to cook.
      * @throws std::runtime_error If user pressed Ctrl+D
      */
-    std::vector<Pizza> getPizzasToCook() const;
+    std::vector<Pizza> getPizzasToCook();
 
 private:
-    const float _multiplier;
-    const int _cooksPerKitchen;
-    const int _restockTimeMs;
+    float _multiplier;
+    int _cooksPerKitchen;
+    int _restockTimeMs;
+    ParsePizza _parser;
 
     std::vector<std::unique_ptr<Kitchen>> _kitchens;
 

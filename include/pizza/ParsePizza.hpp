@@ -13,18 +13,21 @@
 #include <memory>
 #include <iostream>
 #include <regex>
+#include <map>
 
 class ParsePizza {
     public:
         ParsePizza() = default;
         ~ParsePizza() = default;
+        bool CreatePizza(std::string &pizzaName, std::string &pizzaSize,
+            std::string &pizzaNumber);
         bool RunChecker(std::string &input);
         bool CheckInput();
         void SplitInput(std::string &input);
-        void GetPizzas();
+        std::vector<Pizza> GetPizzas();
     private:
         std::vector<std::string> _splitInput{};
-        std::vector<std::string> _pizzas{};
+        std::vector<Pizza> _pizzas{};
 };
 
 #endif //PLAZZA_PARSEPIZZA_HPP

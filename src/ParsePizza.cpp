@@ -5,7 +5,41 @@
 ** ParsePizza.cpp
 */
 
-#include "ParsePizza.hpp"
+#include "pizza/ParsePizza.hpp"
+#include "pizza/PizzaFactory.hpp"
+
+bool ParsePizza::CreatePizza(std::string &pizzaName, std::string &pizzaSize,
+    std::string &pizzaNumber)
+{
+    std::map<std::string, Pizza::PizzaType> pizzaTypeMap = {
+            {"Regina", Pizza::PizzaType::Regina},
+            {"Margarita", Pizza::PizzaType::Margarita},
+            {"Americana", Pizza::PizzaType::Americana},
+            {"Fantasia", Pizza::PizzaType::Fantasia}
+    };
+    std::map<std::string, Pizza::PizzaSize> pizzaSizeMap = {
+            {"S", Pizza::PizzaSize::S},
+            {"M", Pizza::PizzaSize::M},
+            {"L", Pizza::PizzaSize::L},
+            {"XL", Pizza::PizzaSize::XL},
+            {"XXL", Pizza::PizzaSize::XXL}
+    };
+    int number = 1;
+    if (pizzaNumber[0] == 'x')
+        number = std::stoi(pizzaNumber.substr(1, pizzaNumber.length() - 1));
+
+    if (pizzaTypeMap.find(pizzaName) == pizzaTypeMap.end()) {
+        _pizzas.clear();
+        return false;
+    }
+    Pizza::PizzaType type = pizzaTypeMap[pizzaName];
+    Pizza::PizzaSize size = pizzaSizeMap[pizzaSize];
+
+    for (int i = 0; i < number; i++) {
+        _pizzas.push_back(PizzaFactory::createPizza(type, size));
+    }
+    return true;
+}
 
 bool ParsePizza::CheckInput()
 {
@@ -18,16 +52,15 @@ bool ParsePizza::CheckInput()
         std::regex pizzaRegex("^([a-zA-Z]+) (S|M|L|XL|XXL) (x[1-9][0-9]*)$");
         std::smatch pizzaMatchs;
         if (std::regex_search(it, pizzaMatchs, pizzaRegex)) {
-            _pizzas.push_back(it);
             pizzaName = pizzaMatchs[1];
             pizzaSize = pizzaMatchs[2];
             pizzaNumber = pizzaMatchs[3];
-            std::cout << "Name: " << pizzaName << std::endl;
-            std::cout << "Size: " << pizzaSize << std::endl;
-            std::cout << "Number: " << pizzaNumber << std::endl;
+            if (!CreatePizza(pizzaName, pizzaSize, pizzaNumber)) {
+                _pizzas.clear();
+                return false;
+            }
         } else {
             _pizzas.clear();
-            std::cerr << "Error: " << it << std::endl;
             return false;
         }
     }
@@ -37,23 +70,22 @@ bool ParsePizza::CheckInput()
 void ParsePizza::SplitInput(std::string &input)
 {
     std::string delimiter = " ; ";
-    size_t pos = 0;
+    size_t pos = input.find(delimiter);
     std::string token;
 
-    while ((pos = input.find(delimiter)) != std::string::npos) {
+    while (pos != std::string::npos) {
         token = input.substr(0, pos);
         _splitInput.push_back(token);
         input.erase(0, pos + delimiter.length());
+        pos = input.find(delimiter);
     }
     token = input.substr(0, pos);
     _splitInput.push_back(token);
 }
 
-void ParsePizza::GetPizzas()
+std::vector<Pizza> ParsePizza::GetPizzas()
 {
-    for (auto &it : _pizzas) {
-        std::cout << it << std::endl;
-    }
+    return _pizzas;
 }
 
 bool ParsePizza::RunChecker(std::string &input)

@@ -12,8 +12,8 @@
 
 class PizzaIPC: public InterProcessCom {
 public:
-    PizzaIPC();
-    ~PizzaIPC();
+    PizzaIPC() = default;
+    ~PizzaIPC() = default;
 
     /**
      * @brief Sends a pizza to the kitchen.

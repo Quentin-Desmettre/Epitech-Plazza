@@ -5,10 +5,8 @@
 ** main.c
 */
 
-#include <stdio.h>
 #include <string>
 #include <iostream>
-#include "ParsePizza.hpp"
 
 enum PizzaType
 {
@@ -26,23 +24,15 @@ enum PizzaSize
     XL = 8 ,
     XXL = 16
 };
-#include <semaphore>
-#include <thread>
+#include "Reception.hpp"
 
-int main()
+int main(int ac, char **av)
 {
-    std::string pizzaName;
-
-    std::getline(std::cin, pizzaName);
-    ParsePizza parsePizza;
-    while (pizzaName != "exit") {
-        if (parsePizza.RunChecker(pizzaName))
-            parsePizza.GetPizzas();
-        else {
-            std::cout << "Error: " << pizzaName << std::endl;
-        }
-        std::getline(std::cin, pizzaName);
+    try {
+        Reception reception(ac, av);
+    } catch (std::exception &e) {
+        std::cout << e.what() << std::endl;
+        return (84);
     }
-    std::counting_semaphore<1> sem(0);
     return (0);
 }
