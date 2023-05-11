@@ -18,12 +18,12 @@ CXX = g++
 
 NAME = tests
 
-CFLAGS = -Wall -Wextra -I ../include -std=c++20 --coverage -g
+CXXFLAGS = -Wall -Wextra -I ../include -std=c++20 --coverage -g
 
 all: $(NAME)
 
 $(NAME):
-	$(CXX) -o $(NAME) $(SRC) $(CFLAGS) $(INCLUDE) $(LIB)
+	$(CXX) -o $(NAME) $(SRC) $(CXXFLAGS) $(INCLUDE) $(LIB)
 
 clean:
 	rm -f $(OBJ) || true

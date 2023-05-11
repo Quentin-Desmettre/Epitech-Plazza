@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <fcntl.h>
 #include <csignal>
+#include <algorithm>
 
 std::vector<std::string> InterProcessCom::_pipes;
 

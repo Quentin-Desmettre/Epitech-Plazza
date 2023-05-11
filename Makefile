@@ -18,12 +18,12 @@ CXX = g++
 
 NAME = plazza
 
-CFLAGS = -Wall -Wextra -I ./include -std=c++20
+CXXFLAGS = -Wall -Wextra -I ./include -std=c++20
 
 all: $(NAME)
 
 $(NAME):   $(OBJ)
-	$(CXX) -o $(NAME) $(OBJ) $(CFLAGS) $(INCLUDE) $(LIB)
+	$(CXX) -o $(NAME) $(OBJ) $(CXXFLAGS) $(INCLUDE) $(LIB)
 
 tests_run:
 	make -C tests
