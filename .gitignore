@@ -43,4 +43,8 @@ vgcore.*
 *.app
 build
 
+#CLION
+cmake-build-debug
+CMakeLists.txt
+
 plazza
