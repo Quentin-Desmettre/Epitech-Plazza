@@ -6,9 +6,10 @@
 */
 
 #include <stdio.h>
+#include <semaphore>
+#include <thread>
 
-int main(void)
+int main()
 {
-    printf("Hello World!\n");
-    return (0);
+    std::counting_semaphore<1> sem(0);
 }
