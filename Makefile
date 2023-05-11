@@ -12,7 +12,7 @@ SOURCEDIR = src
 
 SRC = $(call rwildc,$(SOURCEDIR),*.cpp)
 
-OBJ = $(SRC:.c=.o)
+OBJ = $(SRC:.cpp=.o)
 
 CXX = g++
 
@@ -24,6 +24,10 @@ all: $(NAME)
 
 $(NAME):   $(OBJ)
 	$(CXX) -o $(NAME) $(OBJ) $(CFLAGS) $(INCLUDE) $(LIB)
+
+tests_run:
+	make -C tests
+	cd tests && ./tests ; rm tests
 
 clean:
 	rm -f $(OBJ)

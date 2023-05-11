@@ -38,7 +38,7 @@ public:
         ChiefLove
     };
 
-    Pizza() = default;
+    Pizza();
     Pizza(PizzaType type, PizzaSize size, float cookTime, const std::vector<Ingredient> &ingredients);
 
     [[nodiscard]] PizzaType getType() const;

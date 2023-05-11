@@ -1,42 +1,37 @@
+
 ##
 ## EPITECH PROJECT, 2023
-## plazza
+## Makefile
 ## File description:
 ## Makefile
 ##
 
-# rwildc = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildc,$d/,$2))
+rwildc = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildc,$d/,$2))
 
-# SOURCEDIR = ./
+SOURCEDIR = ../src/
+SOURCEDIR_2 = ./
 
-# SRC = $(call rwildc,$(SOURCEDIR),*.cpp)
+SRC_TMP = $(call rwildc,$(SOURCEDIR),*.cpp) $(call rwildc,$(SOURCEDIR_2),*.cpp)
+SRC = $(filter-out ../src/main.cpp, $(SRC_TMP))
 
-# CXX = g++
+CXX = g++
 
-# OBJ = $(SRC:.cpp=.o)
+NAME = tests
 
-# NAME = plazza
+CFLAGS = -Wall -Wextra -I ../include -std=c++20 --coverage -g
 
-# CXXFLAGS = -Wall -Wextra -I ./include -std=c++20
+all: $(NAME)
 
-# all: $(NAME)
+$(NAME):
+	$(CXX) -o $(NAME) $(SRC) $(CFLAGS) $(INCLUDE) $(LIB)
 
-# $(NAME):   $(OBJ)
-# 	g++ -o $(NAME) $(OBJ) $(CXXFLAGS)
+clean:
+	rm -f $(OBJ) || true
+	find .. -name "*~" -delete || true
+	find .. -name "*.gcno" -delete || true
+	find .. -name "*.gcda" -delete || true
 
-# tests_run:
-# 	cd tests && make && ./tests
+fclean:    clean
+	rm -f $(NAME)
 
-# clean:
-# 	rm -f $(OBJ)
-# 	find . -name "vgcore.*" -delete
-# 	find . -name "*~" -delete
-# 	find . -name "\#*" -delete
-
-# fclean:    clean
-# 	rm -f $(NAME)
-
-# re:        fclean all
-
-all:
-	echo "int main() { return 0; }" > main.c && gcc -o tests main.c
+re:        fclean all

@@ -16,6 +16,13 @@ Pizza::Pizza(Pizza::PizzaType type, Pizza::PizzaSize size, float cookTime,
     _cookTime = cookTime;
 }
 
+Pizza::Pizza()
+{
+    _type = (Pizza::PizzaType)0;
+    _size = (Pizza::PizzaSize)0;
+    _cookTime = 0;
+}
+
 Pizza::PizzaType Pizza::getType() const
 {
     return _type;

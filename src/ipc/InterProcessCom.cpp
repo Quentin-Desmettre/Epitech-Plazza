@@ -12,6 +12,8 @@
 #include <fcntl.h>
 #include <csignal>
 
+std::map<std::string, int> InterProcessCom::_pipes;
+
 InterProcessCom::InterProcessCom(): _fd(-1)
 {
     // First, find a random name for the named pipe.
