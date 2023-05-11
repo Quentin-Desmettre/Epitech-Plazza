@@ -38,20 +38,24 @@ public:
         ChiefLove
     };
 
-    Pizza(PizzaType type, PizzaSize size, std::vector<Ingredient> ingredients);
+    Pizza() = default;
+    Pizza(PizzaType type, PizzaSize size, float cookTime, const std::vector<Ingredient> &ingredients);
 
-    PizzaType getType() const;
-    PizzaSize getSize() const;
-    std::vector<Ingredient> getIngredients() const;
+    [[nodiscard]] PizzaType getType() const;
+    [[nodiscard]] PizzaSize getSize() const;
+    [[nodiscard]] float getCookTime() const;
+    [[nodiscard]] std::vector<Ingredient> getIngredients() const;
 
     Pizza &setType(PizzaType type);
     Pizza &setSize(PizzaSize size);
     Pizza &addIngredient(Ingredient ingredient);
+    Pizza &setCookTime(float cookTime);
 
 private:
     PizzaType _type;
     PizzaSize _size;
     std::vector<Ingredient> _ingredients;
+    float _cookTime;
 };
 
 #endif //EPITECH_PLAZZA_PIZZA_HPP
