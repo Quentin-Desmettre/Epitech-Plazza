@@ -40,9 +40,9 @@ public:
 
     Pizza(PizzaType type, PizzaSize size, std::vector<Ingredient> ingredients);
 
-    PizzaType getType() const;
-    PizzaSize getSize() const;
-    std::vector<Ingredient> getIngredients() const;
+    [[nodiscard]] PizzaType getType() const;
+    [[nodiscard]] PizzaSize getSize() const;
+    [[nodiscard]] std::vector<Ingredient> getIngredients() const;
 
     Pizza &setType(PizzaType type);
     Pizza &setSize(PizzaSize size);
