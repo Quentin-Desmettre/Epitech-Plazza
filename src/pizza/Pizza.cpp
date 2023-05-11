@@ -6,7 +6,6 @@
 */
 
 #include "pizza/Pizza.hpp"
-#include <utility>
 
 Pizza::Pizza(Pizza::PizzaType type, Pizza::PizzaSize size, float cookTime,
              const std::vector<Ingredient> &ingredients)
@@ -14,7 +13,7 @@ Pizza::Pizza(Pizza::PizzaType type, Pizza::PizzaSize size, float cookTime,
     _type = type;
     _size = size;
     _ingredients = ingredients;
-    _cookTime = true;
+    _cookTime = cookTime;
 }
 
 Pizza::PizzaType Pizza::getType() const
