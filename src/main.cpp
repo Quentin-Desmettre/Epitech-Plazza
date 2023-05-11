@@ -26,8 +26,10 @@ enum PizzaSize
     XL = 8 ,
     XXL = 16
 };
+#include <semaphore>
+#include <thread>
 
-int main(void)
+int main()
 {
     std::string pizzaName;
 
@@ -41,5 +43,6 @@ int main(void)
         }
         std::getline(std::cin, pizzaName);
     }
+    std::counting_semaphore<1> sem(0);
     return (0);
 }
