@@ -1,6 +1,7 @@
+
 ##
 ## EPITECH PROJECT, 2023
-## helloworld
+## Makefile
 ## File description:
 ## Makefile
 ##
@@ -11,27 +12,25 @@ SOURCEDIR = src
 
 SRC = $(call rwildc,$(SOURCEDIR),*.cpp)
 
-CXX = g++
-
 OBJ = $(SRC:.cpp=.o)
+
+CXX = g++
 
 NAME = plazza
 
-CXXFLAGS = -Wall -Wextra -I ./include -std=c++20 -lpthread
+CXXFLAGS = -Wall -Wextra -I ./include -std=c++20
 
 all: $(NAME)
 
 $(NAME):   $(OBJ)
-	g++ -o $(NAME) $(OBJ) $(CXXFLAGS)
+	$(CXX) -o $(NAME) $(OBJ) $(CXXFLAGS) $(INCLUDE) $(LIB)
 
 tests_run:
-	cd tests && make && ./tests
+	make -C tests
+	cd tests && ./tests ; rm tests
 
 clean:
 	rm -f $(OBJ)
-	(find . -name "vgcore.*" -delete) || true
-	(find . -name "*~" -delete) || true
-	(find . -name "\#*" -delete) || true
 
 fclean:    clean
 	rm -f $(NAME)
