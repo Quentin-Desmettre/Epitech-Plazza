@@ -10,6 +10,7 @@
 #include <memory>
 #include <iostream>
 #include <thread>
+#include <unistd.h>
 
 void openIpc(InterProcessCom &com, InterProcessCom::OpenMode mode)
 {

@@ -13,6 +13,7 @@
 #include <csignal>
 #include <algorithm>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
 std::vector<std::string> InterProcessCom::_pipes;
 
