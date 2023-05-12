@@ -52,7 +52,11 @@ public:
      */
     void read(void *data, size_t size) const;
 
+    std::string getPipeName() const;
+
 protected:
+    [[nodiscard]] int bytesAvailable() const;
+
     // List of every named pipe created.
     static std::vector<std::string> _pipes;
 
@@ -60,6 +64,11 @@ protected:
     std::string _name;
     // The file descriptor of the named pipe.
     int _fd;
+
+    OpenMode _mode;
+
+private:
+    static void erasePipes() __attribute__((destructor));
 };
 
 #endif //EPITECH_PLAZZA_INTERPROCESSCOM_HPP

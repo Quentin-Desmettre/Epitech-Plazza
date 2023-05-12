@@ -30,6 +30,11 @@ public:
      * @return The received pizza.
      */
     Pizza receivePizza();
+
+    bool hasPizza();
+
+private:
+    std::vector<char> _buffer;
 };
 
 #endif //EPITECH_PLAZZA_PIZZAIPC_HPP

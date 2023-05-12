@@ -73,4 +73,11 @@ TEST_CASE("interProcessCom")
         CHECK_THROWS_AS(ipc2.read(nullptr, 12), std::runtime_error);
         ipc2.open(InterProcessCom::WRITE);
     }
+
+    SUBCASE("Cannot mkfifo")
+    {
+        InterProcessCom ipc3;
+        unlink(ipc3.getPipeName().c_str());
+        CHECK_THROWS_AS(ipc3.open(InterProcessCom::READ), std::runtime_error);
+    }
 }

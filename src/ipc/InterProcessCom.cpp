@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <csignal>
 #include <algorithm>
+#include <sys/ioctl.h>
 
 std::vector<std::string> InterProcessCom::_pipes;
 
@@ -46,6 +47,7 @@ void InterProcessCom::open(InterProcessCom::OpenMode mode)
     if (_fd != -1)
         ::close(_fd);
     _fd = ::open(_name.c_str(), mode == READ ? O_RDONLY : O_WRONLY);
+    _mode = mode;
     if (_fd == -1)
         throw std::runtime_error("Cannot open named pipe");
 }
@@ -84,4 +86,26 @@ void InterProcessCom::read(void *data, size_t size) const
             throw std::runtime_error("Cannot read from named pipe");
         read += ret;
     }
+}
+
+int InterProcessCom::bytesAvailable() const
+{
+    if (_mode == WRITE)
+        return 0;
+    int bytes = 0;
+
+    if (ioctl(_fd, FIONREAD, &bytes) == -1)
+        throw std::runtime_error("Cannot get number of bytes available in named pipe");
+    return bytes;
+}
+
+void InterProcessCom::erasePipes()
+{
+    for (const std::string &pipe : _pipes)
+        unlink(pipe.c_str());
+}
+
+std::string InterProcessCom::getPipeName() const
+{
+    return _name;
 }

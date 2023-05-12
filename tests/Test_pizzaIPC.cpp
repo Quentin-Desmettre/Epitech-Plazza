@@ -18,6 +18,7 @@ void sendPizza(PizzaIPC &com, const Pizza &pizza)
 
 void readPizza(PizzaIPC &com, Pizza &pizza)
 {
+    while (!com.hasPizza());
     pizza = com.receivePizza();
 }
 
@@ -27,6 +28,7 @@ TEST_CASE("Test_pizzaIPC")
     PizzaIPC ipcRead;
     PizzaIPC ipcWrite(ipcRead);
 
+    // Open IPC
     {
         std::thread t1(openIpc, std::ref(ipcRead), InterProcessCom::READ);
         std::thread t2(openIpc, std::ref(ipcWrite), InterProcessCom::WRITE);
@@ -46,5 +48,25 @@ TEST_CASE("Test_pizzaIPC")
         CHECK_EQ(p2.getSize(), p.getSize());
         CHECK_EQ(p2.getCookTime(), p.getCookTime());
         CHECK_EQ(p2.getIngredients(), p.getIngredients());
+    }
+
+    SUBCASE("send pizza with delay")
+    {
+        Pizza p2;
+        std::thread t2(readPizza, std::ref(ipcRead), std::ref(p2));
+        // Sleep 1 second
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::thread t1(sendPizza, std::ref(ipcWrite), p);
+        t1.join();
+        t2.join();
+        CHECK_EQ(p2.getType(), p.getType());
+        CHECK_EQ(p2.getSize(), p.getSize());
+        CHECK_EQ(p2.getCookTime(), p.getCookTime());
+        CHECK_EQ(p2.getIngredients(), p.getIngredients());
+    }
+
+    SUBCASE("Read pizza without check")
+    {
+        CHECK_THROWS_AS(ipcRead.receivePizza(), std::runtime_error);
     }
 }
