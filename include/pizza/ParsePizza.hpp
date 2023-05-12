@@ -14,6 +14,7 @@
 #include <iostream>
 #include <regex>
 #include <map>
+#include "pizza/Pizza.hpp"
 
 class ParsePizza {
     public:

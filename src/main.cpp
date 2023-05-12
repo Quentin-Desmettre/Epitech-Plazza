@@ -30,6 +30,7 @@ int main(int ac, char **av)
 {
     try {
         Reception reception(ac, av);
+        reception.run();
     } catch (std::exception &e) {
         std::cout << e.what() << std::endl;
         return (84);

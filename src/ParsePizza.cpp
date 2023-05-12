@@ -90,6 +90,8 @@ std::vector<Pizza> ParsePizza::GetPizzas()
 
 bool ParsePizza::RunChecker(std::string &input)
 {
+    _pizzas.clear();
+    _splitInput.clear();
     SplitInput(input);
     return CheckInput();
 }

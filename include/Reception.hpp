@@ -14,7 +14,7 @@
 #include <thread>
 #include <semaphore>
 #include <queue>
-#include "InterProcessCom.hpp"
+#include "ipc/InterProcessCom.hpp"
 #include "pizza/Pizza.hpp"
 #include "Kitchen.hpp"
 #include "pizza/ParsePizza.hpp"
