@@ -7,6 +7,7 @@
 
 #ifndef EPITECH_PLAZZA_KITCHEN_HPP
 #define EPITECH_PLAZZA_KITCHEN_HPP
+#include <thread>
 #include <memory>
 #include "ipc/PizzaIPC.hpp"
 

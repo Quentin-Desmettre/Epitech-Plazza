@@ -5,11 +5,10 @@
 ** main.c
 */
 
-#include <stdio.h>
-#include <semaphore>
-#include <thread>
+#include "Kitchen.hpp"
 
 int main()
 {
-    std::counting_semaphore<1> sem(0);
+    Kitchen kitchen(5, 1, 1.5);
+
 }

@@ -88,3 +88,5 @@ void InterProcessCom::read(void *data, size_t size) const
         read += ret;
     }
 }
+
+std::map<std::string, int> InterProcessCom::_pipes = std::map<std::string, int>();
