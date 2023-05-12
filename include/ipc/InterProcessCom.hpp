@@ -9,6 +9,7 @@
 #define EPITECH_PLAZZA_INTERPROCESSCOM_HPP
 #include <map>
 #include <string>
+#include <vector>
 
 /**
  * @brief Encapsulate the communication between processes, using a named pipe.
@@ -23,6 +24,8 @@ public:
      * @brief Create a named pipe, placed in /tmp/Plazza.
      */
     InterProcessCom();
+
+    InterProcessCom(const InterProcessCom &);
 
     /**
      * @brief Closes the named pipe (if not closed). If the named pipe is not used anymore, it is deleted.
@@ -49,15 +52,23 @@ public:
      */
     void read(void *data, size_t size) const;
 
+    std::string getPipeName() const;
+
 protected:
-    // Counts the number of reference to a named pipe.
-    // If the count is 0, the named pipe is deleted.
-    static std::map<std::string, int> _pipes;
+    [[nodiscard]] int bytesAvailable() const;
+
+    // List of every named pipe created.
+    static std::vector<std::string> _pipes;
 
     //  The name of the named pipe.
     std::string _name;
     // The file descriptor of the named pipe.
     int _fd;
+
+    OpenMode _mode;
+
+private:
+    static void erasePipes() __attribute__((destructor));
 };
 
 #endif //EPITECH_PLAZZA_INTERPROCESSCOM_HPP

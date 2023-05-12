@@ -12,8 +12,8 @@
 
 class PizzaIPC: public InterProcessCom {
 public:
-    PizzaIPC();
-    ~PizzaIPC();
+    PizzaIPC() = default;
+    ~PizzaIPC() = default;
 
     /**
      * @brief Sends a pizza to the kitchen.
@@ -30,6 +30,11 @@ public:
      * @return The received pizza.
      */
     Pizza receivePizza();
+
+    bool hasPizza();
+
+private:
+    std::vector<char> _buffer;
 };
 
 #endif //EPITECH_PLAZZA_PIZZAIPC_HPP

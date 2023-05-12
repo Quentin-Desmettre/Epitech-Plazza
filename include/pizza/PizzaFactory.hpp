@@ -22,7 +22,7 @@ private:
     static Pizza createFantasia(Pizza::PizzaSize size);
 
     typedef Pizza (*PizzaCreator)(Pizza::PizzaSize size);
-    static std::map<std::string, PizzaFactory::PizzaCreator> _pizzaCreators;
+    static const std::map<Pizza::PizzaType, PizzaFactory::PizzaCreator> _pizzaCreators;
 };
 
 #endif //EPITECH_PLAZZA_PIZZAFACTORY_HPP
