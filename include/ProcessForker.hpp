@@ -51,8 +51,22 @@ public:
 
     void join()
     {
+        if (!_isRunnning)
+            throw std::runtime_error("Process not running");
         waitpid(_pid, nullptr, 0);
         _isRunnning = false;
+    }
+
+    void kill()
+    {
+        if (!_isRunnning)
+            throw std::runtime_error("Process not running");
+        ::kill(_pid, SIGKILL);
+        _isRunnning = false;
+    }
+
+    bool isRunning() const {
+        return _isRunnning;
     }
 
 private:
