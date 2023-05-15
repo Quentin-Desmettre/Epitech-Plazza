@@ -69,6 +69,9 @@ private:
     std::condition_variable _pizzaFinished;
     std::mutex _mutex;
 
+    std::mutex _pizzaInCookingMutex;
+
+    int _pizzaInCooking;
     const int _cooks;
     const float _multiplier;
 };
