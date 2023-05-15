@@ -16,17 +16,20 @@ Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _multiplier(m
 
 void Kitchen::run()
 {
+    openIpcs(InterProcessCom::OpenMode::READ, InterProcessCom::OpenMode::WRITE);
 //    _readIpc->open(InterProcessCom::OpenMode::READ);
 //    _writeIpc->open(InterProcessCom::OpenMode::WRITE);
 
 
     std::thread refillThread(&Kitchen::checkForRefill, this);
+    std::thread commandThread(&Kitchen::awaitForCommand, this);
 
 //    while (true) {
 //        awaitFinishedCook();
 //        awaitForCommand();
 //    }
     refillThread.join();
+    commandThread.join();
 }
 
 void Kitchen::checkForRefill()
@@ -46,7 +49,9 @@ void Kitchen::awaitFinishedCook()
 
 void Kitchen::awaitForCommand()
 {
-
+    while (true) {
+        _cookPool.addPizza(_readIpc->receivePizza());
+    }
 }
 
 bool Kitchen::canCookPizza(const Pizza &pizza)
@@ -80,6 +85,8 @@ bool Kitchen::hasPizzaFinished()
 
 bool Kitchen::isKitchenClosed()
 {
+    if (_cookPool.getPizzaInCooking() > 0) return false;
+
     auto now = std::chrono::high_resolution_clock::now();
     double elapsedTimeMS = std::chrono::duration<double, std::milli>(now - _timeoutClock).count();
 
@@ -93,11 +100,12 @@ Pizza Kitchen::getPizza()
 
 void Kitchen::putTheKeyUnderTheDoor()
 {
+    //_process.kill();
 }
 
-void Kitchen::setPid(pid_t pid)
+void Kitchen::setProcess(Process process)
 {
-    _pid = pid;
+    _process = process;
 }
 
 void Kitchen::openIpcs(InterProcessCom::OpenMode first, InterProcessCom::OpenMode second)

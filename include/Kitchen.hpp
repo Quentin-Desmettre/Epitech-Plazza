@@ -11,6 +11,10 @@
 #include <memory>
 #include <chrono>
 #include <future>
+#include <chrono>
+#include <future>
+
+#include "ProcessForker.hpp"
 #include "ipc/PizzaIPC.hpp"
 #include "CookPool.hpp"
 
@@ -99,7 +103,7 @@ public:
      * @brief Closes the kitchen.
      */
     void putTheKeyUnderTheDoor();
-    void setPid(pid_t pid);
+    void setProcess(Process process);
 
     /**
      * @brief Open ipcs.
@@ -116,6 +120,7 @@ private:
 
     std::map<Pizza::Ingredient, int> _ingredients;
     CookPool _cookPool;
+    Process _process;
 };
 
 
