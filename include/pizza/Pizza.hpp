@@ -8,6 +8,8 @@
 #ifndef EPITECH_PLAZZA_PIZZA_HPP
 #define EPITECH_PLAZZA_PIZZA_HPP
 #include <vector>
+#include <string>
+#include <map>
 
 class Pizza {
 public:
@@ -51,11 +53,17 @@ public:
     Pizza &addIngredient(Ingredient ingredient);
     Pizza &setCookTime(float cookTime);
 
+    // Convert to string
+    [[nodiscard]] std::string toString() const;
+
 private:
     PizzaType _type;
     PizzaSize _size;
     std::vector<Ingredient> _ingredients;
     float _cookTime;
+
+    const static std::map<PizzaType, std::string> _pizzaTypeToString;
+    const static std::map<PizzaSize, std::string> _pizzaSizeToString;
 };
 
 #endif //EPITECH_PLAZZA_PIZZA_HPP
