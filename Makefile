@@ -33,6 +33,7 @@ clean:
 	rm -f $(OBJ)
 
 fclean:    clean
+	make -C tests fclean
 	rm -f $(NAME)
 
 re:        fclean all
