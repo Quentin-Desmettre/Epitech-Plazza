@@ -7,7 +7,7 @@
 
 #include "Kitchen.hpp"
 
-Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _cookPool(cooks, multiplier)
+Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _cookPool(cooks, multiplier), _readIpc(nullptr), _writeIpc(nullptr)
 {
     for (int i = 0; i < Pizza::Ingredient::IngredientCount; i++)
         _ingredients[Pizza::Ingredient(i)] = 5;
@@ -17,19 +17,14 @@ Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _multiplier(m
 void Kitchen::run()
 {
     openIpcs(InterProcessCom::OpenMode::READ, InterProcessCom::OpenMode::WRITE);
-//    _readIpc->open(InterProcessCom::OpenMode::READ);
-//    _writeIpc->open(InterProcessCom::OpenMode::WRITE);
-
 
     std::thread refillThread(&Kitchen::checkForRefill, this);
     std::thread commandThread(&Kitchen::awaitForCommand, this);
+    std::thread cookThread(&Kitchen::awaitFinishedCook, this);
 
-//    while (true) {
-//        awaitFinishedCook();
-//        awaitForCommand();
-//    }
     refillThread.join();
     commandThread.join();
+    cookThread.join();
 }
 
 void Kitchen::checkForRefill()
@@ -45,6 +40,12 @@ void Kitchen::checkForRefill()
 void Kitchen::awaitFinishedCook()
 {
 
+    while (true) {
+        std::vector<Pizza> finishedPizzas = _cookPool.clearFinishedPizzas();
+
+        for (auto &pizza : finishedPizzas)
+            _writeIpc->sendPizza(pizza);
+    }
 }
 
 void Kitchen::awaitForCommand()
@@ -75,12 +76,17 @@ int Kitchen::getCapacity() const
 
 void Kitchen::addPizza(const Pizza &pizza)
 {
-
+    _writeIpc->sendPizza(pizza);
 }
 
 bool Kitchen::hasPizzaFinished()
 {
-
+    try {
+        _writeIpc->receivePizza();
+        return true;
+    } catch (std::exception &e) {
+        return false;
+    }
 }
 
 bool Kitchen::isKitchenClosed()
@@ -95,12 +101,12 @@ bool Kitchen::isKitchenClosed()
 
 Pizza Kitchen::getPizza()
 {
-
+    return _readIpc->receivePizza();
 }
 
 void Kitchen::putTheKeyUnderTheDoor()
 {
-    //_process.kill();
+    _process.kill();
 }
 
 void Kitchen::setProcess(Process process)

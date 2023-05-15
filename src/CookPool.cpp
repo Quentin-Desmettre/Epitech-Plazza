@@ -7,6 +7,7 @@
 
 #include "CookPool.hpp"
 
+#include <iostream>
 CookPool::CookPool(int cooks, float multiplier) : _pizzasToCook(0), _pizzaInCooking(0),
     _cooks(cooks), _multiplier(multiplier)
 {
@@ -16,6 +17,7 @@ CookPool::CookPool(int cooks, float multiplier) : _pizzasToCook(0), _pizzaInCook
 
 void CookPool::addPizza(const Pizza &pizza)
 {
+    std::cout << "Adding pizza to cook" << std::endl;
     _queue.push(pizza);
     _pizzasToCook.release();
 }

@@ -116,7 +116,6 @@ private:
     const int _cooks;
     const int _restockTimeMs;
     std::chrono::high_resolution_clock::time_point _timeoutClock;
-    pid_t _pid;
 
     std::map<Pizza::Ingredient, int> _ingredients;
     CookPool _cookPool;

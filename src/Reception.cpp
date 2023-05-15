@@ -42,15 +42,17 @@ void Reception::run()
 {
     while (true) {
         if (std::cin.peek() != std::istream::traits_type::eof()) {
-            getPizzasToCook();
+            // tmp
+            std::cout << "New order" << std::endl;
+            dispatchPizzas();
         }
         for (auto &kitchen : _kitchens) {
             if (kitchen->isKitchenClosed()) {
-                //kitchen->close();
+                kitchen->putTheKeyUnderTheDoor();
             }
             if (kitchen->hasPizzaFinished()) {
-            //    auto pizza = kitchen->getPizzaCooked();
-            //    std::cout << "Pizza " << pizza.getName() << " cooked by kitchen " << kitchen->getId() << std::endl;
+                auto pizza = kitchen->getPizza();
+                std::cout << "Pizza " << pizza.getType() << " cooked" << std::endl;
             }
         }
     }
@@ -65,16 +67,30 @@ void Reception::runKitchen(Kitchen *kitchen)
 
 void Reception::addKitchen()
 {
+    std::cout << "1" << std::endl;
+
     std::unique_ptr<Kitchen> kitchen = std::make_unique<Kitchen>(_multiplier, _cooksPerKitchen, _restockTimeMs);
     Process process;
     kitchen->setProcess(process);
+    std::cout << "2" << std::endl;
     process.runObject(this, &Reception::runKitchen, kitchen.get());
-
+    std::cout << "3" << std::endl;
     kitchen->openIpcs(PizzaIPC::WRITE, PizzaIPC::READ);
+    std::cout << "4" << std::endl;
+
     _kitchens.push_back(std::move(kitchen));
+    std::cout << "finito" << std::endl;
+
 }
 
 void Reception::dispatchPizzas()
 {
+    std::vector<Pizza> pizzas = getPizzasToCook();
 
+    for (auto &pizza : pizzas) {
+        if (_kitchens.empty() || _kitchens.back()->isKitchenClosed())
+            addKitchen();
+        std::cout << "Dispatching pizza " << pizza.getType() << std::endl;
+        _kitchens.back()->addPizza(pizza);
+    }
 }
