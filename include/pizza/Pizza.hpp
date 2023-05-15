@@ -35,7 +35,8 @@ public:
         Steak,
         Eggplant,
         GoatCheese,
-        ChiefLove
+        ChiefLove,
+        IngredientCount
     };
 
     Pizza();

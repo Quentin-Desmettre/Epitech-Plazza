@@ -9,7 +9,10 @@
 #define EPITECH_PLAZZA_KITCHEN_HPP
 #include <thread>
 #include <memory>
+#include <chrono>
+#include <future>
 #include "ipc/PizzaIPC.hpp"
+#include "CookPool.hpp"
 
 /**
  * @brief Kitchen class
@@ -103,7 +106,11 @@ private:
     const float _multiplier;
     const int _cooks;
     const int _restockTimeMs;
+    std::chrono::high_resolution_clock::time_point _timeoutClock;
     pid_t _pid;
+
+    std::map<Pizza::Ingredient, int> _ingredients;
+    CookPool _cookPool;
 };
 
 

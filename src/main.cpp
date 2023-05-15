@@ -9,6 +9,4 @@
 
 int main()
 {
-    Kitchen kitchen(5, 1, 1.5);
-
 }
