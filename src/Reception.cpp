@@ -54,20 +54,26 @@ void Reception::run()
     }
 }
 
-std::unique_ptr<Kitchen> Reception::addKitchen()
+void Reception::addKitchen()
 {
     std::unique_ptr<Kitchen> kitchen = std::make_unique<Kitchen>(_multiplier, _cooksPerKitchen, _restockTimeMs);
+    InterProcessCom ipc1;
+    InterProcessCom ipc2;
     int pid = fork();
+    if (pid == -1)
+        throw std::runtime_error("fork failed");
     if (pid == 0) {
+        ipc1.open(InterProcessCom::OpenMode::READ);
+        ipc2.open(InterProcessCom::OpenMode::WRITE);
         //open IPC
         kitchen->run();
         exit(0);
     }
+    ipc1.open(InterProcessCom::OpenMode::WRITE);
+    ipc2.open(InterProcessCom::OpenMode::READ);
     //open IPC;
-    kitchen->setId(pid);
+    kitchen->setPid(pid);
     _kitchens.push_back(std::move(kitchen));
-    //WARNING HERE : std::move and std::move
-    return std::move(kitchen);
 }
 
 void Reception::dispatchPizzas() {

@@ -97,6 +97,11 @@ public:
     void putTheKeyUnderTheDoor();
     void setPid(pid_t pid);
 
+    /**
+     * @brief Open ipcs.
+     */
+     void openIpcs(InterProcessCom::OpenMode first, InterProcessCom::OpenMode second);
+
 private:
     std::unique_ptr<PizzaIPC> _readIpc, _writeIpc;
     const float _multiplier;

@@ -8,32 +8,34 @@
 #include "pizza/ParsePizza.hpp"
 #include "pizza/PizzaFactory.hpp"
 
+std::map<std::string, Pizza::PizzaType> ParsePizza::_pizzaTypeMap = {
+        {"Regina", Pizza::PizzaType::Regina},
+        {"Margarita", Pizza::PizzaType::Margarita},
+        {"Americana", Pizza::PizzaType::Americana},
+        {"Fantasia", Pizza::PizzaType::Fantasia}
+};
+
+std::map<std::string, Pizza::PizzaSize> ParsePizza::_pizzaSizeMap = {
+        {"S", Pizza::PizzaSize::S},
+        {"M", Pizza::PizzaSize::M},
+        {"L", Pizza::PizzaSize::L},
+        {"XL", Pizza::PizzaSize::XL},
+        {"XXL", Pizza::PizzaSize::XXL}
+};
+
 bool ParsePizza::CreatePizza(std::string &pizzaName, std::string &pizzaSize,
     std::string &pizzaNumber)
 {
-    std::map<std::string, Pizza::PizzaType> pizzaTypeMap = {
-            {"Regina", Pizza::PizzaType::Regina},
-            {"Margarita", Pizza::PizzaType::Margarita},
-            {"Americana", Pizza::PizzaType::Americana},
-            {"Fantasia", Pizza::PizzaType::Fantasia}
-    };
-    std::map<std::string, Pizza::PizzaSize> pizzaSizeMap = {
-            {"S", Pizza::PizzaSize::S},
-            {"M", Pizza::PizzaSize::M},
-            {"L", Pizza::PizzaSize::L},
-            {"XL", Pizza::PizzaSize::XL},
-            {"XXL", Pizza::PizzaSize::XXL}
-    };
     int number = 1;
     if (pizzaNumber[0] == 'x')
         number = std::stoi(pizzaNumber.substr(1, pizzaNumber.length() - 1));
 
-    if (pizzaTypeMap.find(pizzaName) == pizzaTypeMap.end()) {
+    if (_pizzaTypeMap.find(pizzaName) == _pizzaTypeMap.end()) {
         _pizzas.clear();
         return false;
     }
-    Pizza::PizzaType type = pizzaTypeMap[pizzaName];
-    Pizza::PizzaSize size = pizzaSizeMap[pizzaSize];
+    Pizza::PizzaType type = _pizzaTypeMap[pizzaName];
+    Pizza::PizzaSize size = _pizzaSizeMap[pizzaSize];
 
     for (int i = 0; i < number; i++) {
         _pizzas.push_back(PizzaFactory::createPizza(type, size));

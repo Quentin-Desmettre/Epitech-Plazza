@@ -26,6 +26,10 @@ class ParsePizza {
         bool CheckInput();
         void SplitInput(std::string &input);
         std::vector<Pizza> GetPizzas();
+
+        static std::map<std::string, Pizza::PizzaType> _pizzaTypeMap;
+        static std::map<std::string, Pizza::PizzaSize> _pizzaSizeMap;
+
     private:
         std::vector<std::string> _splitInput{};
         std::vector<Pizza> _pizzas{};

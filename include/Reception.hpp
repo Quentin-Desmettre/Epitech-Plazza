@@ -70,7 +70,7 @@ private:
      *      - add kitchen to the list
      * @return the created kitchen
      */
-    std::unique_ptr<Kitchen> addKitchen();
+    void addKitchen();
 
     /**
      * @brief Dispatches pizzas to the kitchens.
