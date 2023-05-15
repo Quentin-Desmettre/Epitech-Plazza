@@ -11,6 +11,8 @@
 #include <memory>
 #include <chrono>
 #include <future>
+
+#include "ProcessForker.hpp"
 #include "ipc/PizzaIPC.hpp"
 #include "CookPool.hpp"
 
@@ -99,7 +101,7 @@ public:
      * @brief Closes the kitchen.
      */
     void putTheKeyUnderTheDoor();
-    void setPid(pid_t pid);
+    void setProcess(Process process);
 
 private:
     std::unique_ptr<PizzaIPC> _readIpc, _writeIpc;
@@ -107,7 +109,7 @@ private:
     const int _cooks;
     const int _restockTimeMs;
     std::chrono::high_resolution_clock::time_point _timeoutClock;
-    pid_t _pid;
+    Process _process;
 
     std::map<Pizza::Ingredient, int> _ingredients;
     CookPool _cookPool;
