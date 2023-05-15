@@ -28,4 +28,9 @@ add_executable(Epitech_Plazza
         src/ParsePizza.cpp
         include/pizza/ParsePizza.hpp
         src/Reception.cpp
+        include/logging/ILogger.hpp
+        src/logging/ILogger.cpp
+        src/logging/CliLogger.cpp
+        include/logging/CliLogger.hpp
+        tests/Test_CliLogger.cpp
 )
