@@ -7,11 +7,13 @@
 
 #include "Kitchen.hpp"
 
-Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _cookPool(cooks, multiplier), _readIpc(nullptr), _writeIpc(nullptr)
+Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _readIpc(nullptr), _writeIpc(nullptr), _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _cookPool(cooks, multiplier)
 {
     for (int i = 0; i < Pizza::Ingredient::IngredientCount; i++)
         _ingredients[Pizza::Ingredient(i)] = 5;
     _timeoutClock = std::chrono::high_resolution_clock::now();
+    _readIpc = std::make_unique<PizzaIPC>();
+    _writeIpc = std::make_unique<PizzaIPC>();
 }
 
 void Kitchen::run()
@@ -51,7 +53,8 @@ void Kitchen::awaitFinishedCook()
 void Kitchen::awaitForCommand()
 {
     while (true) {
-        _cookPool.addPizza(_readIpc->receivePizza());
+        if (_readIpc->hasPizza())
+            _cookPool.addPizza(_readIpc->receivePizza());
     }
 }
 
@@ -81,12 +84,7 @@ void Kitchen::addPizza(const Pizza &pizza)
 
 bool Kitchen::hasPizzaFinished()
 {
-    try {
-        _writeIpc->receivePizza();
-        return true;
-    } catch (std::exception &e) {
-        return false;
-    }
+    return _readIpc->hasPizza();
 }
 
 bool Kitchen::isKitchenClosed()

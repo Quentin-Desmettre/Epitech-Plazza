@@ -46,15 +46,10 @@ InterProcessCom::~InterProcessCom()
 #include <iostream>
 void InterProcessCom::open(InterProcessCom::OpenMode mode)
 {
-    std::cout << "Open ipcs" << std::endl;
-    std::cout << "fd:  " << _fd << std::endl;
     if (_fd != -1)
         ::close(_fd);
-    std::cout << "Open ipcs 2" << std::endl;
     _fd = ::open(_name.c_str(), mode == READ ? O_RDONLY : O_WRONLY);
     _mode = mode;
-
-    std::cout << "Open ipcs 3" << std::endl;
     if (_fd == -1)
         throw std::runtime_error("Cannot open named pipe");
 }

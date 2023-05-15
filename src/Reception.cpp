@@ -42,14 +42,13 @@ void Reception::run()
 {
     while (true) {
         if (std::cin.peek() != std::istream::traits_type::eof()) {
-            // tmp
             std::cout << "New order" << std::endl;
             dispatchPizzas();
         }
         for (auto &kitchen : _kitchens) {
-            if (kitchen->isKitchenClosed()) {
-                kitchen->putTheKeyUnderTheDoor();
-            }
+            //if (kitchen->isKitchenClosed()) {
+             //   kitchen->putTheKeyUnderTheDoor();
+            //}
             if (kitchen->hasPizzaFinished()) {
                 auto pizza = kitchen->getPizza();
                 std::cout << "Pizza " << pizza.getType() << " cooked" << std::endl;
@@ -80,7 +79,6 @@ void Reception::addKitchen()
 
     _kitchens.push_back(std::move(kitchen));
     std::cout << "finito" << std::endl;
-
 }
 
 void Reception::dispatchPizzas()

@@ -8,12 +8,15 @@
 #include "ipc/PizzaIPC.hpp"
 #include "pizza/PizzaEncoder.hpp"
 #include <memory>
+#include <iostream>
 
 void PizzaIPC::sendPizza(const Pizza &pizza)
 {
     std::vector<char> data = PizzaEncoder::_2pac(pizza);
     std::size_t size = data.size();
+    std::cout << "Sending pizza of size " << size << std::endl;
     InterProcessCom::write(&size, sizeof(std::size_t));
+    std::cout << "Sending pizza of size " << size << std::endl;
     InterProcessCom::write(data.data(), data.size());
 }
 

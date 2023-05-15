@@ -8,7 +8,8 @@ include_directories(include/ipc)
 include_directories(include/pizza)
 
 add_executable(Epitech_Plazza
-        src/main.cpp include/ProcessForker.hpp
+        src/main.cpp
+        include/ProcessForker.hpp
         include/Reception.hpp
         src/pizza/Pizza.cpp
         include/pizza/Pizza.hpp
@@ -32,5 +33,4 @@ add_executable(Epitech_Plazza
         src/logging/ILogger.cpp
         src/logging/CliLogger.cpp
         include/logging/CliLogger.hpp
-        tests/Test_CliLogger.cpp
 )

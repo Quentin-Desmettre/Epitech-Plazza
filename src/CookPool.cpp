@@ -11,8 +11,8 @@
 CookPool::CookPool(int cooks, float multiplier) : _pizzasToCook(0), _pizzaInCooking(0),
     _cooks(cooks), _multiplier(multiplier)
 {
-    for (int i = 0; i < _cooks; i++)
-        _cookers.emplace_back(&CookPool::cookThread, this);
+    //for (int i = 0; i < _cooks; i++)
+    //    _cookers.emplace_back(&CookPool::cookThread, this);
 }
 
 void CookPool::addPizza(const Pizza &pizza)
