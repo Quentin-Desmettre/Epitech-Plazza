@@ -29,6 +29,7 @@ Reception::Reception(int ac, char **av)
 std::vector<Pizza> Reception::getPizzasToCook()
 {
     std::string pizzaName;
+
     if (!std::getline(std::cin, pizzaName))
         throw std::runtime_error("User pressed Ctrl+D");
     if (pizzaName == "exit")
