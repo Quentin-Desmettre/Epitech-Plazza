@@ -71,6 +71,7 @@ private:
      * @return the created kitchen
      */
     void addKitchen();
+    void runKitchen(Kitchen *kitchen);
 
     /**
      * @brief Dispatches pizzas to the kitchens.

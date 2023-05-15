@@ -7,6 +7,7 @@
 
 #include <unistd.h>
 #include "Reception.hpp"
+#include "ProcessForker.hpp"
 
 Reception::Reception(int ac, char **av)
 {
@@ -54,47 +55,25 @@ void Reception::run()
     }
 }
 
+void Reception::runKitchen(Kitchen *kitchen)
+{
+    kitchen->openIpcs(PizzaIPC::READ, PizzaIPC::WRITE);
+    kitchen->run();
+}
+
+
 void Reception::addKitchen()
 {
     std::unique_ptr<Kitchen> kitchen = std::make_unique<Kitchen>(_multiplier, _cooksPerKitchen, _restockTimeMs);
-    InterProcessCom ipc1;
-    InterProcessCom ipc2;
-    int pid = fork();
-    if (pid == -1)
-        throw std::runtime_error("fork failed");
-    if (pid == 0) {
-        ipc1.open(InterProcessCom::OpenMode::READ);
-        ipc2.open(InterProcessCom::OpenMode::WRITE);
-        //open IPC
-        kitchen->run();
-        exit(0);
-    }
-    ipc1.open(InterProcessCom::OpenMode::WRITE);
-    ipc2.open(InterProcessCom::OpenMode::READ);
-    //open IPC;
-    kitchen->setPid(pid);
+    Process process;
+    kitchen->setProcess(process);
+    process.runObject(this, &Reception::runKitchen, kitchen.get());
+
+    kitchen->openIpcs(PizzaIPC::WRITE, PizzaIPC::READ);
     _kitchens.push_back(std::move(kitchen));
 }
 
-void Reception::dispatchPizzas() {
-    //at the end of the function, all pizzas are dispatched and all kitchens have the same number of pizzas to cook
-    std::vector<Pizza> pizzas = getPizzasToCook();
-    std::vector<std::unique_ptr<Kitchen>> kitchens;
+void Reception::dispatchPizzas()
+{
 
-    int index;
-    int nbPizzas = 100;
-
-    while (!pizzas.empty()) {
-        index = 0;
-
-        for (int i = 0; i < kitchens.size(); i++)
-            if (kitchen[i]->getPizzasAwaiting() < nbPizzas &&
-                kitchen[i]->getCapacity() > kitchen[i]->getPizzasAwaiting())
-                index = kitchen;
-
-        if (kitchens.empty())
-            addKitchen();
-        kitchens[index]->addPizza(pizzas.back());
-        pizzas.pop_back();
-    }
 }

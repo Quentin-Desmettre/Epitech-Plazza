@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.24.2)
 project(Epitech_Plazza)
 
 set(CMAKE_CXX_STANDARD 20)
 
 include_directories(include)
+include_directories(include/ipc)
+include_directories(include/pizza)
 
 add_executable(Epitech_Plazza
         src/main.cpp include/ProcessForker.hpp

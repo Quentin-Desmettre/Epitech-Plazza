@@ -7,8 +7,12 @@
 
 #ifndef EPITECH_PLAZZA_KITCHEN_HPP
 #define EPITECH_PLAZZA_KITCHEN_HPP
+#include <thread>
 #include <memory>
+#include <chrono>
+#include <future>
 #include "ipc/PizzaIPC.hpp"
+#include "CookPool.hpp"
 
 /**
  * @brief Kitchen class
@@ -100,14 +104,18 @@ public:
     /**
      * @brief Open ipcs.
      */
-     void openIpcs(InterProcessCom::OpenMode first, InterProcessCom::OpenMode second);
+    void openIpcs(InterProcessCom::OpenMode first, InterProcessCom::OpenMode second);
 
 private:
     std::unique_ptr<PizzaIPC> _readIpc, _writeIpc;
     const float _multiplier;
     const int _cooks;
     const int _restockTimeMs;
+    std::chrono::high_resolution_clock::time_point _timeoutClock;
     pid_t _pid;
+
+    std::map<Pizza::Ingredient, int> _ingredients;
+    CookPool _cookPool;
 };
 
 

@@ -7,10 +7,10 @@
 
 #include "CookPool.hpp"
 
-CookPool::CookPool(int cooks, float multiplier) : _multiplier(multiplier), _cooks(cooks),
-    _mutex(), _pizzaFinished(), _queue(), _finishedPizzas(), _pizzasToCook(0), _pizzaInCooking(0), _pizzaInCookingMutex()
+CookPool::CookPool(int cooks, float multiplier) : _pizzasToCook(0), _pizzaInCooking(0),
+    _cooks(cooks), _multiplier(multiplier)
 {
-    for (int i = 0; i < cooks; i++)
+    for (int i = 0; i < _cooks; i++)
         _cookers.emplace_back(&CookPool::cookThread, this);
 }
 
@@ -32,8 +32,8 @@ void CookPool::cookThread()
         _pizzaInCooking++;
         _pizzaInCookingMutex.unlock();
 
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(pizza.getCookingTime() * _multiplier));
+        unsigned long test = pizza.getCookTime() * _multiplier * 1000;
+        std::this_thread::sleep_for(std::chrono::nanoseconds(test));
         //TODO: Quentin tu suces ?
 
 
