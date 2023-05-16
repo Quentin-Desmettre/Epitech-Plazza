@@ -108,7 +108,7 @@ public:
     /**
      * @brief Open ipcs.
      */
-    void openIpcs(InterProcessCom::OpenMode first, InterProcessCom::OpenMode second);
+    void openIpcs(int isForked = 0);
 
 private:
     std::unique_ptr<PizzaIPC> _readIpc, _writeIpc;

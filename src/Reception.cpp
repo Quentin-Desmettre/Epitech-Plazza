@@ -59,10 +59,10 @@ void Reception::run()
 
 void Reception::runKitchen(Kitchen *kitchen)
 {
-    kitchen->openIpcs(PizzaIPC::READ, PizzaIPC::WRITE);
+    kitchen->openIpcs(1);
+    std::cout << "Running kitchen" << std::endl;
     kitchen->run();
 }
-
 
 void Reception::addKitchen()
 {
@@ -74,7 +74,7 @@ void Reception::addKitchen()
     std::cout << "2" << std::endl;
     process.runObject(this, &Reception::runKitchen, kitchen.get());
     std::cout << "3" << std::endl;
-    kitchen->openIpcs(PizzaIPC::WRITE, PizzaIPC::READ);
+    kitchen->openIpcs();
     std::cout << "4" << std::endl;
 
     _kitchens.push_back(std::move(kitchen));

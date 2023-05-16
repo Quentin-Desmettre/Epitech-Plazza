@@ -18,8 +18,6 @@ Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _readIpc(null
 
 void Kitchen::run()
 {
-    openIpcs(InterProcessCom::OpenMode::READ, InterProcessCom::OpenMode::WRITE);
-
     std::thread refillThread(&Kitchen::checkForRefill, this);
     std::thread commandThread(&Kitchen::awaitForCommand, this);
     std::thread cookThread(&Kitchen::awaitFinishedCook, this);
@@ -112,8 +110,13 @@ void Kitchen::setProcess(Process process)
     _process = process;
 }
 
-void Kitchen::openIpcs(InterProcessCom::OpenMode first, InterProcessCom::OpenMode second)
+void Kitchen::openIpcs(int isForked)
 {
-    _readIpc->open(first);
-    _writeIpc->open(second);
+    if (isForked) {
+        _readIpc->open(InterProcessCom::OpenMode::READ);
+        _writeIpc->open(InterProcessCom::OpenMode::WRITE);
+    } else {
+        _readIpc->open(InterProcessCom::OpenMode::READ);
+        _writeIpc->open(InterProcessCom::OpenMode::WRITE);
+    }
 }
