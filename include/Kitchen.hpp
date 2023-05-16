@@ -111,7 +111,7 @@ public:
     void openIpcs(int isForked = 0);
 
 private:
-    std::unique_ptr<PizzaIPC> _readIpc, _writeIpc;
+    std::unique_ptr<PizzaIPC> _ipcPtoC, _ipcCtoP;
     const float _multiplier;
     const int _cooks;
     const int _restockTimeMs;

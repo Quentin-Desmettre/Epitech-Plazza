@@ -60,25 +60,19 @@ void Reception::run()
 void Reception::runKitchen(Kitchen *kitchen)
 {
     kitchen->openIpcs(1);
-    std::cout << "Running kitchen" << std::endl;
     kitchen->run();
 }
 
 void Reception::addKitchen()
 {
-    std::cout << "1" << std::endl;
-
     std::unique_ptr<Kitchen> kitchen = std::make_unique<Kitchen>(_multiplier, _cooksPerKitchen, _restockTimeMs);
     Process process;
     kitchen->setProcess(process);
-    std::cout << "2" << std::endl;
     process.runObject(this, &Reception::runKitchen, kitchen.get());
-    std::cout << "3" << std::endl;
     kitchen->openIpcs();
-    std::cout << "4" << std::endl;
 
     _kitchens.push_back(std::move(kitchen));
-    std::cout << "finito" << std::endl;
+    std::cout << "\nAdding kitchen" << std::endl << std::endl;
 }
 
 void Reception::dispatchPizzas()

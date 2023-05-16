@@ -6,14 +6,15 @@
 */
 
 #include "Kitchen.hpp"
+#include <iostream>
 
-Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _readIpc(nullptr), _writeIpc(nullptr), _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _cookPool(cooks, multiplier)
+Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _ipcPtoC(nullptr), _ipcCtoP(nullptr), _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _cookPool(cooks, multiplier)
 {
     for (int i = 0; i < Pizza::Ingredient::IngredientCount; i++)
         _ingredients[Pizza::Ingredient(i)] = 5;
     _timeoutClock = std::chrono::high_resolution_clock::now();
-    _readIpc = std::make_unique<PizzaIPC>();
-    _writeIpc = std::make_unique<PizzaIPC>();
+    _ipcCtoP = std::make_unique<PizzaIPC>();
+    _ipcPtoC = std::make_unique<PizzaIPC>();
 }
 
 void Kitchen::run()
@@ -43,16 +44,18 @@ void Kitchen::awaitFinishedCook()
     while (true) {
         std::vector<Pizza> finishedPizzas = _cookPool.clearFinishedPizzas();
 
-        for (auto &pizza : finishedPizzas)
-            _writeIpc->sendPizza(pizza);
+        for (auto &pizza : finishedPizzas) {
+            std::cout << "Pizza finished" << std::endl;
+            _ipcCtoP->sendPizza(pizza);
+        }
     }
 }
 
 void Kitchen::awaitForCommand()
 {
     while (true) {
-        if (_readIpc->hasPizza())
-            _cookPool.addPizza(_readIpc->receivePizza());
+        if (_ipcPtoC->hasPizza())
+            _cookPool.addPizza(_ipcPtoC->receivePizza());
     }
 }
 
@@ -77,12 +80,12 @@ int Kitchen::getCapacity() const
 
 void Kitchen::addPizza(const Pizza &pizza)
 {
-    _writeIpc->sendPizza(pizza);
+    _ipcPtoC->sendPizza(pizza);
 }
 
 bool Kitchen::hasPizzaFinished()
 {
-    return _readIpc->hasPizza();
+    return _ipcCtoP->hasPizza();
 }
 
 bool Kitchen::isKitchenClosed()
@@ -97,7 +100,7 @@ bool Kitchen::isKitchenClosed()
 
 Pizza Kitchen::getPizza()
 {
-    return _readIpc->receivePizza();
+    return _ipcCtoP->receivePizza();
 }
 
 void Kitchen::putTheKeyUnderTheDoor()
@@ -113,10 +116,10 @@ void Kitchen::setProcess(Process process)
 void Kitchen::openIpcs(int isForked)
 {
     if (isForked) {
-        _readIpc->open(InterProcessCom::OpenMode::READ);
-        _writeIpc->open(InterProcessCom::OpenMode::WRITE);
+        _ipcCtoP->open(InterProcessCom::OpenMode::WRITE);
+        _ipcPtoC->open(InterProcessCom::OpenMode::READ);
     } else {
-        _readIpc->open(InterProcessCom::OpenMode::READ);
-        _writeIpc->open(InterProcessCom::OpenMode::WRITE);
+        _ipcCtoP->open(InterProcessCom::OpenMode::READ);
+        _ipcPtoC->open(InterProcessCom::OpenMode::WRITE);
     }
 }
