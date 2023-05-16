@@ -12,6 +12,7 @@
 #include <condition_variable>
 #include "pizza/Pizza.hpp"
 #include <thread>
+#include "Semaphore.hpp"
 
 class CookPool {
 public:
@@ -68,6 +69,7 @@ private:
     std::vector<std::thread> _cookers;
     std::condition_variable _pizzaFinished;
     std::mutex _mutex;
+    Semaphore _semaphore;
 
     std::mutex _pizzaInCookingMutex;
 

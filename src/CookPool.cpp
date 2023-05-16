@@ -6,10 +6,11 @@
 */
 
 #include "CookPool.hpp"
-
 #include <iostream>
+#include <cstring>
+
 CookPool::CookPool(int cooks, float multiplier) : _pizzasToCook(0), _pizzaInCooking(0),
-    _cooks(cooks), _multiplier(multiplier)
+    _cooks(cooks), _multiplier(multiplier), _semaphore(0)
 {
     for (int i = 0; i < _cooks; i++)
         _cookers.emplace_back(&CookPool::cookThread, this);
@@ -17,32 +18,24 @@ CookPool::CookPool(int cooks, float multiplier) : _pizzasToCook(0), _pizzaInCook
 
 void CookPool::addPizza(const Pizza &pizza)
 {
-    std::cout << "Adding pizza to cook" << std::endl;
+    _pizzaInCookingMutex.lock();
     _queue.push(pizza);
-    std::cout << "Adding pizza to cook 1" << std::endl;
-    _pizzasToCook.release();
-    std::cout << "Adding pizza to cook 2" << std::endl;
+    _semaphore.increment();
+    _pizzaInCookingMutex.unlock();
 }
 
 void CookPool::cookThread()
 {
     while (true) {
-        std::cout << "Waiting for pizza" << std::endl;
-        _pizzasToCook.acquire();
-        std::cout << "Waiting for pizza 0.5" << std::endl;
+        _semaphore.decrement();
+
         _pizzaInCookingMutex.lock();
-        std::cout << "Waiting for pizza 1" << std::endl;
         auto pizza = _queue.front();
         _queue.pop();
         _pizzaInCooking++;
-        std::cout << "Waiting for pizza 2" << std::endl;
         _pizzaInCookingMutex.unlock();
-        std::cout << "Cooking pizza " << pizza.getType() << std::endl;
 
-        unsigned long test = pizza.getCookTime() * _multiplier * 1000;
-        std::this_thread::sleep_for(std::chrono::nanoseconds(test));
-        //TODO: Quentin tu suces ?
-
+        std::this_thread::sleep_for(std::chrono::milliseconds((unsigned)(pizza.getCookTime() * _multiplier * 1000)));
 
         _pizzaInCookingMutex.lock();
         _pizzaInCooking--;

@@ -38,10 +38,22 @@ std::vector<Pizza> Reception::getPizzasToCook()
     return _parser.GetPizzas();
 }
 
+
+// TODO noa mets moi ça dans une classe
+#include <sys/ioctl.h>
+int bytesAvailable(int fd)
+{
+    int bytes = 0;
+
+    if (ioctl(fd, FIONREAD, &bytes) == -1)
+        throw std::runtime_error("Cannot get number of bytes available");
+    return bytes;
+}
+
 void Reception::run()
 {
     while (true) {
-        if (std::cin.peek() != std::istream::traits_type::eof()) {
+        if (bytesAvailable(0) > 0) {
             std::cout << "New order" << std::endl;
             dispatchPizzas();
         }
@@ -59,17 +71,17 @@ void Reception::run()
 
 void Reception::runKitchen(Kitchen *kitchen)
 {
-    kitchen->openIpcs(1);
+    kitchen->openIpcs(true);
     kitchen->run();
 }
 
 void Reception::addKitchen()
 {
-    std::unique_ptr<Kitchen> kitchen = std::make_unique<Kitchen>(_multiplier, _cooksPerKitchen, _restockTimeMs);
+    std::unique_ptr<Kitchen> kitchen = std::make_unique<Kitchen>(_cooksPerKitchen, _restockTimeMs, _multiplier);
     Process process;
     kitchen->setProcess(process);
     process.runObject(this, &Reception::runKitchen, kitchen.get());
-    kitchen->openIpcs();
+    kitchen->openIpcs(false);
 
     _kitchens.push_back(std::move(kitchen));
     std::cout << "\nAdding kitchen" << std::endl << std::endl;

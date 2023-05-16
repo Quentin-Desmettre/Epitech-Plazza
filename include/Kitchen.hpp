@@ -88,6 +88,10 @@ public:
      */
     bool hasPizzaFinished();
 
+    /**
+     * @brief
+     * @return
+     */
     bool isKitchenClosed();
 
     /**
@@ -108,17 +112,17 @@ public:
     /**
      * @brief Open ipcs.
      */
-    void openIpcs(int isForked = 0);
+    void openIpcs(bool isForked);
 
 private:
-    std::unique_ptr<PizzaIPC> _ipcPtoC, _ipcCtoP;
+    std::unique_ptr<PizzaIPC> _ipcParentToChild, _ipcChildToParent;
     const float _multiplier;
     const int _cooks;
     const int _restockTimeMs;
     std::chrono::high_resolution_clock::time_point _timeoutClock;
 
     std::map<Pizza::Ingredient, int> _ingredients;
-    CookPool _cookPool;
+    std::unique_ptr<CookPool> _cookPool;
     Process _process;
 };
 

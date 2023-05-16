@@ -8,17 +8,18 @@
 #include "Kitchen.hpp"
 #include <iostream>
 
-Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _ipcPtoC(nullptr), _ipcCtoP(nullptr), _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _cookPool(cooks, multiplier)
+Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _ipcParentToChild(nullptr), _ipcChildToParent(nullptr), _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _cookPool(nullptr)
 {
     for (int i = 0; i < Pizza::Ingredient::IngredientCount; i++)
         _ingredients[Pizza::Ingredient(i)] = 5;
     _timeoutClock = std::chrono::high_resolution_clock::now();
-    _ipcCtoP = std::make_unique<PizzaIPC>();
-    _ipcPtoC = std::make_unique<PizzaIPC>();
+    _ipcChildToParent = std::make_unique<PizzaIPC>();
+    _ipcParentToChild = std::make_unique<PizzaIPC>();
 }
 
 void Kitchen::run()
 {
+    _cookPool = std::make_unique<CookPool>(_cooks, _multiplier);
     std::thread refillThread(&Kitchen::checkForRefill, this);
     std::thread commandThread(&Kitchen::awaitForCommand, this);
     std::thread cookThread(&Kitchen::awaitFinishedCook, this);
@@ -40,13 +41,12 @@ void Kitchen::checkForRefill()
 
 void Kitchen::awaitFinishedCook()
 {
-
     while (true) {
-        std::vector<Pizza> finishedPizzas = _cookPool.clearFinishedPizzas();
+        std::vector<Pizza> finishedPizzas = _cookPool->clearFinishedPizzas();
 
         for (auto &pizza : finishedPizzas) {
             std::cout << "Pizza finished" << std::endl;
-            _ipcCtoP->sendPizza(pizza);
+            _ipcChildToParent->sendPizza(pizza);
         }
     }
 }
@@ -54,8 +54,10 @@ void Kitchen::awaitFinishedCook()
 void Kitchen::awaitForCommand()
 {
     while (true) {
-        if (_ipcPtoC->hasPizza())
-            _cookPool.addPizza(_ipcPtoC->receivePizza());
+        if (_ipcParentToChild->hasPizza()) {
+            std::cout << "Pizza received" << std::endl;
+            _cookPool->addPizza(_ipcParentToChild->receivePizza());
+        }
     }
 }
 
@@ -70,7 +72,7 @@ bool Kitchen::canCookPizza(const Pizza &pizza)
 
 int Kitchen::getPizzasAwaiting() const
 {
-    return _cookPool.getPizzaInCooking();
+    return _cookPool->getPizzaInCooking();
 }
 
 int Kitchen::getCapacity() const
@@ -80,17 +82,17 @@ int Kitchen::getCapacity() const
 
 void Kitchen::addPizza(const Pizza &pizza)
 {
-    _ipcPtoC->sendPizza(pizza);
+    _ipcParentToChild->sendPizza(pizza);
 }
 
 bool Kitchen::hasPizzaFinished()
 {
-    return _ipcCtoP->hasPizza();
+    return _ipcChildToParent->hasPizza();
 }
 
 bool Kitchen::isKitchenClosed()
 {
-    if (_cookPool.getPizzaInCooking() > 0) return false;
+    if (_cookPool->getPizzaInCooking() > 0) return false;
 
     auto now = std::chrono::high_resolution_clock::now();
     double elapsedTimeMS = std::chrono::duration<double, std::milli>(now - _timeoutClock).count();
@@ -100,7 +102,7 @@ bool Kitchen::isKitchenClosed()
 
 Pizza Kitchen::getPizza()
 {
-    return _ipcCtoP->receivePizza();
+    return _ipcChildToParent->receivePizza();
 }
 
 void Kitchen::putTheKeyUnderTheDoor()
@@ -113,13 +115,13 @@ void Kitchen::setProcess(Process process)
     _process = process;
 }
 
-void Kitchen::openIpcs(int isForked)
+void Kitchen::openIpcs(bool isForked)
 {
     if (isForked) {
-        _ipcCtoP->open(InterProcessCom::OpenMode::WRITE);
-        _ipcPtoC->open(InterProcessCom::OpenMode::READ);
+        _ipcChildToParent->open(InterProcessCom::OpenMode::WRITE);
+        _ipcParentToChild->open(InterProcessCom::OpenMode::READ);
     } else {
-        _ipcCtoP->open(InterProcessCom::OpenMode::READ);
-        _ipcPtoC->open(InterProcessCom::OpenMode::WRITE);
+        _ipcChildToParent->open(InterProcessCom::OpenMode::READ);
+        _ipcParentToChild->open(InterProcessCom::OpenMode::WRITE);
     }
 }
