@@ -33,7 +33,10 @@ class Reception {
      * Steps:
      *  - check if there is data availabe on the std input
      *      => if so, parse user input
-     *  - for each kitchen, check if it has to close
+     *  - for each kitchen, check if it is doing something
+     *          if so, restart its clock
+     *          else, check if the clock > TIME_TO_DIE:
+     *              if so, kill the kitchen
      *  - for each kitchen, check if has a pizza cooked
      */
     void run();
