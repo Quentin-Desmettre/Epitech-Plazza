@@ -5,9 +5,10 @@
 ** Reception
 */
 
-#include <unistd.h>
 #include "Reception.hpp"
 #include "ProcessForker.hpp"
+#include "logging/ILogger.hpp"
+#include "logging/CliLogger.hpp"
 
 Reception::Reception(int ac, char **av)
 {
@@ -23,7 +24,7 @@ Reception::Reception(int ac, char **av)
         throw std::invalid_argument("Cooks per kitchen must be greater than 0");
     if (_restockTimeMs <= 0)
         throw std::invalid_argument("Restock time must be greater than 0");
-    _parser = ParsePizza();
+    ILogger::createLogger<CliLogger>();
 }
 
 std::vector<Pizza> Reception::getPizzasToCook()
@@ -37,7 +38,6 @@ std::vector<Pizza> Reception::getPizzasToCook()
     _parser.RunChecker(pizzaName);
     return _parser.GetPizzas();
 }
-
 
 // TODO noa mets moi ça dans une classe
 #include <sys/ioctl.h>
@@ -54,7 +54,6 @@ void Reception::run()
 {
     while (true) {
         if (bytesAvailable(0) > 0) {
-            std::cout << "New order" << std::endl;
             dispatchPizzas();
         }
         for (auto &kitchen : _kitchens) {
@@ -63,7 +62,7 @@ void Reception::run()
             //}
             if (kitchen->hasPizzaFinished()) {
                 auto pizza = kitchen->getPizza();
-                std::cout << "Pizza " << pizza.getType() << " cooked" << std::endl;
+                ILogger::getLogger().logPizzaReceivedByReception(kitchen->getId(), pizza);
             }
         }
     }
@@ -78,13 +77,14 @@ void Reception::runKitchen(Kitchen *kitchen)
 void Reception::addKitchen()
 {
     std::unique_ptr<Kitchen> kitchen = std::make_unique<Kitchen>(_cooksPerKitchen, _restockTimeMs, _multiplier);
+
     Process process;
     kitchen->setProcess(process);
     process.runObject(this, &Reception::runKitchen, kitchen.get());
     kitchen->openIpcs(false);
 
+    ILogger::getLogger().logKitchenCreated(kitchen->getId());
     _kitchens.push_back(std::move(kitchen));
-    std::cout << "\nAdding kitchen" << std::endl << std::endl;
 }
 
 void Reception::dispatchPizzas()
@@ -94,7 +94,7 @@ void Reception::dispatchPizzas()
     for (auto &pizza : pizzas) {
         if (_kitchens.empty() || _kitchens.back()->isKitchenClosed())
             addKitchen();
-        std::cout << "Dispatching pizza " << pizza.getType() << std::endl;
+        ILogger::getLogger().logPizzaSentToKitchen(_kitchens.back()->getId(), pizza);
         _kitchens.back()->addPizza(pizza);
     }
 }

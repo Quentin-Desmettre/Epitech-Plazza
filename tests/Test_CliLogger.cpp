@@ -27,22 +27,52 @@ TEST_CASE("clilogger")
     // Log
     logger.logKitchenCreated(1);
     logger.logKitchenClosed(1);
-    logger.logPizzaReceived(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
+    logger.logPizzaSentToKitchen(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
+    logger.logPizzaReceivedByKitchen(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
+    logger.logPizzaSentToReception(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
+    logger.logPizzaReceivedByReception(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
     logger.logPizzaCookingStarted(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
     logger.logPizzaCooked(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
+    logger.logIngredientsStockUpdated(1, {{Pizza::Doe, Semaphore(1)}, {Pizza::ChiefLove, Semaphore(2)}});
 
     // Get file content
     std::ifstream file("plazza.log");
     std::string line;
 
+    // Kitchen #1 created
     std::getline(file, line);
     CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 created");
+
+    // Kitchen #1 closed
     std::getline(file, line);
     CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 closed");
+
+    // Kitchen #1 received Regina S
     std::getline(file, line);
-    CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 received Regina S");
+    CHECK_EQ(line, "[" + std::string(buffer) + "] Sent Regina S to kitchen #1");
+
+    // Kitchen #1 received Regina S
+    std::getline(file, line);
+    CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 received Regina S from reception");
+
+    // Kitchen #1 sent Regina S to reception
+    std::getline(file, line);
+    CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 sent Regina S to reception");
+
+    // Kitchen #1 received Regina S from kitchen #1
+    std::getline(file, line);
+    CHECK_EQ(line, "[" + std::string(buffer) + "] Reception received Regina S from kitchen #1");
+
+    // Kitchen #1 started cooking Regina S
     std::getline(file, line);
     CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 started cooking Regina S");
+
+    // Kitchen #1 cooked Regina S
     std::getline(file, line);
     CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 cooked Regina S");
+
+    // Ingredients stock updated
+    std::getline(file, line);
+//    CHECK_EQ(line, "[" + std::string(buffer) + "] Ingredients stock updated: Doe=1 ChiefLove=2");
+    CHECK_EQ("[" + std::string(buffer) + "] Kitchen #1 ingredients stock updated: 0: 1, 8: 2", line);
 }
