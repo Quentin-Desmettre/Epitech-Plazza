@@ -72,9 +72,9 @@ void CookPool::waitPizzaFinished()
     _pizzaFinished.wait(lock);
 }
 
-CookPool::Ingredients &CookPool::getIngredients()
+CookPool::Ingredients *CookPool::getIngredients()
 {
-    return _ingredients;
+    return &_ingredients;
 }
 
 void CookPool::waitForIngredients(const Pizza &pizza)

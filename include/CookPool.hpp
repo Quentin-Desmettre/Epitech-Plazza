@@ -64,7 +64,7 @@ public:
 
     using Ingredients = std::map<Pizza::Ingredient, Semaphore>;
 
-    Ingredients &getIngredients();
+    Ingredients *getIngredients();
 
     void waitForIngredients(const Pizza &pizza);
 

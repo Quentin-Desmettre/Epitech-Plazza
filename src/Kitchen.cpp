@@ -29,12 +29,12 @@ void Kitchen::run()
 
 void Kitchen::checkForRefill()
 {
-    CookPool::Ingredients ingredients = _cookPool->getIngredients();
+    CookPool::Ingredients *ingredients = _cookPool->getIngredients();
 
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(_restockTimeMs));
 
-        for (auto &ingredient : ingredients)
+        for (auto &ingredient : *ingredients)
             ingredient.second.increment();
     }
 }
