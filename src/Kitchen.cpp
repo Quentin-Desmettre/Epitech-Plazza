@@ -10,8 +10,6 @@
 
 Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _ipcParentToChild(nullptr), _ipcChildToParent(nullptr), _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _isCooking(false), _cookPool(nullptr)
 {
-    for (int i = 0; i < Pizza::Ingredient::IngredientCount; i++)
-        _ingredients[Pizza::Ingredient(i)] = Semaphore(5);
     _timeoutClock = std::chrono::high_resolution_clock::now();
     _ipcChildToParent = std::make_unique<PizzaIPC>();
     _ipcParentToChild = std::make_unique<PizzaIPC>();
@@ -31,10 +29,12 @@ void Kitchen::run()
 
 void Kitchen::checkForRefill()
 {
+    CookPool::Ingredients ingredients = _cookPool->getIngredients();
+
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(_restockTimeMs));
 
-        for (auto &ingredient : _ingredients)
+        for (auto &ingredient : ingredients)
             ingredient.second.increment();
     }
 }
@@ -57,41 +57,15 @@ void Kitchen::awaitFinishedCook()
 
 void Kitchen::awaitForCommand()
 {
-    std::vector<Pizza> pizzas;
-
     while (true) {
         if (_ipcParentToChild->hasPizza()) {
             std::cout << "Pizza received" << std::endl;
-            pizzas.emplace_back(_ipcParentToChild->receivePizza());
-        }
+            Pizza pizza = _ipcParentToChild->receivePizza();
 
-        for (auto it = pizzas.begin(); it != pizzas.end();) {
-            auto& pizza = *it;
-            if (!canCookPizza(pizza)) {
-                it++;
-                continue;
-            }
-
-            waitForIngredients(pizza);
             _cookPool->addPizza(pizza);
             _isCooking = true;
-            pizzas.erase(it);
         }
     }
-}
-
-bool Kitchen::canCookPizza(const Pizza &pizza)
-{
-    for (auto &ingredient : pizza.getIngredients())
-        if (_ingredients[ingredient].getValue() == 0)
-            return false;
-    return true;
-}
-
-void Kitchen::waitForIngredients(const Pizza &pizza)
-{
-    for (auto &ingredient : pizza.getIngredients())
-        _ingredients[ingredient].decrement();
 }
 
 int Kitchen::getPizzasAwaiting() const

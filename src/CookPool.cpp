@@ -14,10 +14,15 @@ CookPool::CookPool(int cooks, float multiplier) : _pizzasToCook(0), _pizzaInCook
 {
     for (int i = 0; i < _cooks; i++)
         _cookers.emplace_back(&CookPool::cookThread, this);
+    for (int i = 0; i < Pizza::Ingredient::IngredientCount; i++)
+        _ingredients[Pizza::Ingredient(i)] = Semaphore(5);
 }
 
 void CookPool::addPizza(Pizza pizza)
 {
+    std::cout << "Waiting for ingredients" << std::endl;
+    waitForIngredients(pizza);
+
     std::cout << "Adding pizza" << std::endl;
     _pizzaInCookingMutex.lock();
     _queue.push(pizza);
@@ -65,4 +70,15 @@ void CookPool::waitPizzaFinished()
 {
     std::unique_lock<std::mutex> lock(_mutex);
     _pizzaFinished.wait(lock);
+}
+
+CookPool::Ingredients &CookPool::getIngredients()
+{
+    return _ingredients;
+}
+
+void CookPool::waitForIngredients(const Pizza &pizza)
+{
+    for (auto &ingredient : pizza.getIngredients())
+        _ingredients[ingredient].decrement();
 }

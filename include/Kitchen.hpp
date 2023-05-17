@@ -54,7 +54,6 @@ public:
     void awaitForCommand();
 
     bool canCookPizza(const Pizza &pizza);
-    void waitForIngredients(const Pizza &pizza);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Methods to be called from the reception
@@ -124,7 +123,6 @@ private:
     bool _isCooking;
     std::chrono::high_resolution_clock::time_point _timeoutClock;
 
-    std::map<Pizza::Ingredient, Semaphore> _ingredients;
     std::unique_ptr<CookPool> _cookPool;
     Process _process;
 };

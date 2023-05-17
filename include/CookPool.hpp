@@ -62,6 +62,12 @@ public:
      */
     void waitPizzaFinished();
 
+    using Ingredients = std::map<Pizza::Ingredient, Semaphore>;
+
+    Ingredients &getIngredients();
+
+    void waitForIngredients(const Pizza &pizza);
+
 private:
     std::queue<Pizza> _queue;
     std::counting_semaphore<INT32_MAX> _pizzasToCook;
@@ -76,6 +82,7 @@ private:
     int _pizzaInCooking;
     const int _cooks;
     const float _multiplier;
+    Ingredients _ingredients;
 };
 
 #endif //EPITECH_PLAZZA_COOKPOOL_HPP
