@@ -76,10 +76,14 @@ private:
     void addKitchen();
     void runKitchen(Kitchen *kitchen);
 
+
+    void checkKitchen();
+    std::unique_ptr<Kitchen> *getKitchen();
+    void checkOrderAndSendPizzas();
     /**
      * @brief Dispatches pizzas to the kitchens.
      */
-    void dispatchPizzas();
+    void dispatchPizzas(std::vector<Pizza> &pizzas);
 };
 
 #endif //EPITECH_PLAZZA_RECEPTION_HPP

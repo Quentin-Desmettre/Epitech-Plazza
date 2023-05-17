@@ -8,6 +8,11 @@
 #ifndef EPITECH_PLAZZA_SEMAPHORE_HPP
 #define EPITECH_PLAZZA_SEMAPHORE_HPP
 #include <semaphore>
+#ifdef __APPLE__
+    #include <sys/semaphore.h>
+#endif
+#include <random>
+#include <string>
 
 
 class Semaphore {
@@ -22,6 +27,7 @@ class Semaphore {
 
     private:
         sem_t _sem;
+        std::string _name;
 };
 
 
