@@ -90,12 +90,11 @@ void Reception::addKitchen()
 
 void Reception::checkKitchen()
 {
-    bool kitchensFull = false;
+    bool kitchensFull = true;
 
     for (auto &kitchen : _kitchens)
         if (kitchen->getPizzasAwaiting() != kitchen->getCapacity()) {
             kitchensFull = false;
-            kitchensFull = true;
             break;
         }
     if (kitchensFull || _kitchens.empty())
@@ -105,9 +104,11 @@ void Reception::checkKitchen()
 std::unique_ptr<Kitchen> *Reception::getKitchen()
 {
     std::unique_ptr<Kitchen> *ref = &_kitchens.back();
+    //TODO: change la getPizzaAwaiting
     int actualSize = (*ref)->getCapacity() - (*ref)->getPizzasAwaiting();
 
     for (auto &kitchen : _kitchens) {
+        //TODO: change la getPizzaAwaiting
         int size = kitchen->getCapacity() - kitchen->getPizzasAwaiting();
         if (size < actualSize && !kitchen->isKitchenClosed())
             ref = &kitchen;
@@ -132,7 +133,7 @@ void Reception::dispatchPizzas(std::vector<Pizza> &pizzas)
     for (auto &pizza : pizzas) {
         checkKitchen();
         ILogger::getLogger().logPizzaSentToKitchen(_kitchens.back()->getId(), pizza);
-        getKitchen()->get()->addPizza(pizza);
+        getKitchen();
         std::cout << "Dispatching pizza " << pizza.getType() << std::endl;
     }
 }
