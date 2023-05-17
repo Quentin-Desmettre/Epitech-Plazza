@@ -73,7 +73,6 @@ void InterProcessCom::write(const void *data, size_t size) const
 
     std::size_t written = 0;
     while (written < size) {
-        std::cout << "Writing to fd " << _fd << std::endl;
         ssize_t ret = ::write(_fd, (char *)data + written, size - written);
         if (ret == -1)
             throw std::runtime_error("Cannot write to named pipe" + std::string(std::strerror(errno)));

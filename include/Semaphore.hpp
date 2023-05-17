@@ -11,16 +11,17 @@
 
 
 class Semaphore {
-public:
-    explicit Semaphore(int value);
-    ~Semaphore();
+    public:
+        Semaphore() = default;
+        explicit Semaphore(int value);
+        ~Semaphore();
 
-    void increment();
-    void decrement();
-    int getValue() const;
+        void increment();
+        void decrement();
+        int getValue() const;
 
-private:
-    sem_t _sem;
+    private:
+        sem_t _sem;
 };
 
 

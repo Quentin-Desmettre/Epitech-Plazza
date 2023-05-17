@@ -16,7 +16,6 @@ void PizzaIPC::sendPizza(const Pizza &pizza)
     std::size_t size = data.size();
     InterProcessCom::write(&size, sizeof(std::size_t));
     InterProcessCom::write(data.data(), data.size());
-    std::cout << "Sending pizza of size " << size << std::endl << std::endl;
 }
 
 Pizza PizzaIPC::receivePizza()

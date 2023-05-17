@@ -16,8 +16,9 @@ CookPool::CookPool(int cooks, float multiplier) : _pizzasToCook(0), _pizzaInCook
         _cookers.emplace_back(&CookPool::cookThread, this);
 }
 
-void CookPool::addPizza(const Pizza &pizza)
+void CookPool::addPizza(Pizza pizza)
 {
+    std::cout << "Adding pizza" << std::endl;
     _pizzaInCookingMutex.lock();
     _queue.push(pizza);
     _semaphore.increment();
@@ -52,6 +53,9 @@ int CookPool::getPizzaInCooking() const
 
 std::vector<Pizza> CookPool::clearFinishedPizzas()
 {
+    if (_finishedPizzas.empty())
+        return {};
+
     std::vector<Pizza> pizzas;
     pizzas.swap(_finishedPizzas);
     return pizzas;
