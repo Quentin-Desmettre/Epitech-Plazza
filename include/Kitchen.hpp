@@ -119,6 +119,8 @@ private:
     const float _multiplier;
     const int _cooks;
     const int _restockTimeMs;
+
+    bool _isCooking;
     std::chrono::high_resolution_clock::time_point _timeoutClock;
 
     std::map<Pizza::Ingredient, int> _ingredients;

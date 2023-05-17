@@ -8,7 +8,7 @@
 #include "Kitchen.hpp"
 #include <iostream>
 
-Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _ipcParentToChild(nullptr), _ipcChildToParent(nullptr), _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _cookPool(nullptr)
+Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _ipcParentToChild(nullptr), _ipcChildToParent(nullptr), _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _isCooking(false), _cookPool(nullptr)
 {
     for (int i = 0; i < Pizza::Ingredient::IngredientCount; i++)
         _ingredients[Pizza::Ingredient(i)] = 5;
@@ -31,6 +31,7 @@ void Kitchen::run()
 
 void Kitchen::checkForRefill()
 {
+    // TODO: Ingredients in semaphore
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(_restockTimeMs));
 
@@ -48,6 +49,10 @@ void Kitchen::awaitFinishedCook()
             std::cout << "Pizza finished" << std::endl;
             _ipcChildToParent->sendPizza(pizza);
         }
+        if (_cookPool->getPizzaInCooking() == 0) {
+            _isCooking = false;
+            _timeoutClock = std::chrono::high_resolution_clock::now();
+        }
     }
 }
 
@@ -57,6 +62,7 @@ void Kitchen::awaitForCommand()
         if (_ipcParentToChild->hasPizza()) {
             std::cout << "Pizza received" << std::endl;
             _cookPool->addPizza(_ipcParentToChild->receivePizza());
+            _isCooking = true;
         }
     }
 }
@@ -92,7 +98,8 @@ bool Kitchen::hasPizzaFinished()
 
 bool Kitchen::isKitchenClosed()
 {
-    if (_cookPool->getPizzaInCooking() > 0) return false;
+    if (_isCooking)
+        return false;
 
     auto now = std::chrono::high_resolution_clock::now();
     double elapsedTimeMS = std::chrono::duration<double, std::milli>(now - _timeoutClock).count();
