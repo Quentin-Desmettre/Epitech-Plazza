@@ -46,13 +46,11 @@ InterProcessCom::~InterProcessCom()
     close();
 }
 
-#include <iostream>
 void InterProcessCom::open(InterProcessCom::OpenMode mode)
 {
     if (_fd != -1)
-        throw std::runtime_error("t un connard");
+        this->close();
     _fd = ::open(_name.c_str(), mode == READ ? O_RDONLY : O_WRONLY);
-    std::cout << "Opening " << _name << " in " << (mode == READ ? "READ" : "WRITE") << " mode as fd " << _fd << std::endl;
     _mode = mode;
     if (_fd == -1)
         throw std::runtime_error("Cannot open named pipe" + std::string(std::strerror(errno)));

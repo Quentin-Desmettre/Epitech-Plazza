@@ -61,13 +61,17 @@ public:
     void kill()
     {
         if (!_isRunnning)
-            throw std::runtime_error("Process not running");
+            return;
         ::kill(_pid, SIGKILL);
         _isRunnning = false;
     }
 
     bool isRunning() const {
         return _isRunnning;
+    }
+
+    pid_t getPid() const {
+        return _pid;
     }
 
 private:

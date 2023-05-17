@@ -6,11 +6,12 @@
 */
 
 #include "CookPool.hpp"
+#include "logging/ILogger.hpp"
 #include <iostream>
-#include <cstring>
+#include "Kitchen.hpp"
 
-CookPool::CookPool(int cooks, float multiplier) : _pizzasToCook(0),
-    _semaphore(0), _pizzaInCooking(0), _cooks(cooks), _multiplier(multiplier)
+CookPool::CookPool(int cooks, float multiplier, const Kitchen &kitchen) : _queuedPizzaSemaphore(0),
+    _pizzaInCooking(0), _cooks(cooks), _multiplier(multiplier), _kitchen(kitchen)
 {
     for (int i = 0; i < _cooks; i++)
         _cookers.emplace_back(&CookPool::cookThread, this);
@@ -20,28 +21,27 @@ CookPool::CookPool(int cooks, float multiplier) : _pizzasToCook(0),
 
 void CookPool::addPizza(Pizza pizza)
 {
-    std::cout << "Waiting for ingredients" << std::endl;
-    waitForIngredients(pizza);
-
-    std::cout << "Adding pizza" << std::endl;
     _pizzaInCookingMutex.lock();
     _queue.push(pizza);
-    _semaphore.increment();
+    _queuedPizzaSemaphore.increment();
     _pizzaInCookingMutex.unlock();
 }
 
 void CookPool::cookThread()
 {
     while (true) {
-        _semaphore.decrement();
+        _queuedPizzaSemaphore.decrement();
 
         _pizzaInCookingMutex.lock();
         auto pizza = _queue.front();
         _queue.pop();
         _pizzaInCooking++;
         _pizzaInCookingMutex.unlock();
+        waitForIngredients(pizza);
 
+        ILogger::getLogger().logPizzaCookingStarted(_kitchen.getId(), pizza);
         std::this_thread::sleep_for(std::chrono::milliseconds((unsigned)(pizza.getCookTime() * _multiplier * 1000)));
+        ILogger::getLogger().logPizzaCooked(_kitchen.getId(), pizza);
 
         _pizzaInCookingMutex.lock();
         _pizzaInCooking--;
@@ -72,9 +72,9 @@ void CookPool::waitPizzaFinished()
     _pizzaFinished.wait(lock);
 }
 
-CookPool::Ingredients &CookPool::getIngredients()
+CookPool::Ingredients *CookPool::getIngredients()
 {
-    return _ingredients;
+    return &_ingredients;
 }
 
 void CookPool::waitForIngredients(const Pizza &pizza)

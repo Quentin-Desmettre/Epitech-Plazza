@@ -26,6 +26,7 @@
 class Kitchen {
 public:
     Kitchen(int cooks, int restockTimeMs, float multiplier);
+    ~Kitchen();
 
 ////////////////////////////////////////////////////////////////////////////////
 // Methods to be called from the forked process
@@ -108,11 +109,14 @@ public:
      */
     void putTheKeyUnderTheDoor();
     void setProcess(Process process);
+    const Process &getProcess() const;
 
     /**
      * @brief Open ipcs.
      */
     void openIpcs(bool isForked);
+
+    int getId() const;
 
 private:
     std::unique_ptr<PizzaIPC> _ipcParentToChild, _ipcChildToParent;
@@ -125,6 +129,9 @@ private:
 
     std::unique_ptr<CookPool> _cookPool;
     Process _process;
+
+    int _id;
+    static int _maxId;
 };
 
 
