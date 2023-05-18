@@ -10,9 +10,8 @@
 #include <iostream>
 #include "Kitchen.hpp"
 
-CookPool::CookPool(int cooks, float multiplier, const Kitchen &kitchen) : _pizzaInCooking(0),
-                                                  _cooks(cooks), _multiplier(multiplier), _queuedPizzaSemaphore(0),
-                                                  _kitchen(kitchen)
+CookPool::CookPool(int cooks, float multiplier, const Kitchen &kitchen) : _queuedPizzaSemaphore(0),
+    _pizzaInCooking(0), _cooks(cooks), _multiplier(multiplier), _kitchen(kitchen)
 {
     for (int i = 0; i < _cooks; i++)
         _cookers.emplace_back(&CookPool::cookThread, this);

@@ -24,6 +24,7 @@ Reception::Reception(int ac, char **av)
         throw std::invalid_argument("Cooks per kitchen must be greater than 0");
     if (_restockTimeMs <= 0)
         throw std::invalid_argument("Restock time must be greater than 0");
+    _parser = ParsePizza();
     ILogger::createLogger<CliLogger>();
 }
 
@@ -54,7 +55,7 @@ void Reception::run()
 {
     while (true) {
         if (bytesAvailable(0) > 0) {
-            dispatchPizzas();
+            checkOrderAndSendPizzas();
         }
         for (auto &kitchen : _kitchens) {
             //if (kitchen->isKitchenClosed()) {
@@ -87,14 +88,52 @@ void Reception::addKitchen()
     _kitchens.push_back(std::move(kitchen));
 }
 
-void Reception::dispatchPizzas()
+void Reception::checkKitchen()
+{
+    bool kitchensFull = true;
+
+    for (auto &kitchen : _kitchens)
+        if (kitchen->getPizzasAwaiting() != kitchen->getCapacity()) {
+            kitchensFull = false;
+            break;
+        }
+    if (kitchensFull || _kitchens.empty())
+        addKitchen();
+}
+
+std::unique_ptr<Kitchen> *Reception::getKitchen()
+{
+    std::unique_ptr<Kitchen> *ref = &_kitchens.back();
+    //TODO: change la getPizzaAwaiting
+    int actualSize = (*ref)->getCapacity() - (*ref)->getPizzasAwaiting();
+
+    for (auto &kitchen : _kitchens) {
+        //TODO: change la getPizzaAwaiting
+        int size = kitchen->getCapacity() - kitchen->getPizzasAwaiting();
+        if (size < actualSize && !kitchen->isKitchenClosed())
+            ref = &kitchen;
+    }
+    return ref;
+}
+
+void Reception::checkOrderAndSendPizzas()
 {
     std::vector<Pizza> pizzas = getPizzasToCook();
 
+    if (pizzas.empty()) {
+        std::cout << "Order error" << std::endl;
+        return;
+    }
+    std::cout << "New order" << std::endl;
+    dispatchPizzas(pizzas);
+}
+
+void Reception::dispatchPizzas(std::vector<Pizza> &pizzas)
+{
     for (auto &pizza : pizzas) {
-        if (_kitchens.empty() || _kitchens.back()->isKitchenClosed())
-            addKitchen();
+        checkKitchen();
         ILogger::getLogger().logPizzaSentToKitchen(_kitchens.back()->getId(), pizza);
-        _kitchens.back()->addPizza(pizza);
+        getKitchen();
+        std::cout << "Dispatching pizza " << pizza.getType() << std::endl;
     }
 }
