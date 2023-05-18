@@ -8,7 +8,9 @@
 #ifndef EPITECH_PLAZZA_ILOGGER_HPP
 #define EPITECH_PLAZZA_ILOGGER_HPP
 #include <string>
+#include <vector>
 #include <memory>
+#include "Semaphore.hpp"
 #include "pizza/Pizza.hpp"
 
 class ILogger {
@@ -22,7 +24,6 @@ public:
 
     static ILogger &getLogger();
 
-    // General
     /**
      * @brief Create the logger from a class.
      */
@@ -47,11 +48,18 @@ public:
     virtual void logKitchenClosed(int id) = 0;
 
     /**
+     * @brief Log the sending of a pizza to a kitchen from the reception.
+     * @param kitchenId The id of the kitchen.
+     * @param pizza The pizza sent.
+     */
+    virtual void logPizzaSentToKitchen(int kitchenId, const Pizza &pizza) = 0;
+
+    /**
      * @brief Log the reception of a pizza by a kitchen.
      * @param kitchenId The id of the kitchen.
      * @param pizza The pizza received.
      */
-    virtual void logPizzaReceived(int kitchenId, const Pizza &pizza) = 0;
+    virtual void logPizzaReceivedByKitchen(int kitchenId, const Pizza &pizza) = 0;
 
     /**
      * @brief Log the start of cooking of a pizza by a kitchen.
@@ -66,6 +74,26 @@ public:
      * @param pizza The pizza cooked.
      */
     virtual void logPizzaCooked(int kitchenId, const Pizza &pizza) = 0;
+
+    /**
+     * @brief Log the sending of a pizza to the reception.
+     * @param kitchenId
+     * @param pizza
+     */
+    virtual void logPizzaSentToReception(int kitchenId, const Pizza &pizza) = 0;
+
+    /**
+     * @brief Log the reception of a pizza by the reception.
+     * @param kitchenId Id of the kitchen that sent the pizza.
+     * @param pizza The pizza received.
+     */
+    virtual void logPizzaReceivedByReception(int kitchenId, const Pizza &pizza) = 0;
+
+    /**
+     * @brief Log the refill of the ingredients stock.
+     * @param ingredients The new ingredients stock.
+     */
+    virtual void logIngredientsStockUpdated(int kitchenId, const std::map<Pizza::Ingredient, Semaphore> &ingredients) = 0;
 
 protected:
     ILogger() = default;

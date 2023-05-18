@@ -15,38 +15,47 @@ public:
     CliLogger();
 
     // Events
-    /**
-     * @brief Log the creation of a kitchen.
-     * @param id The id of the kitchen.
-     */
     void logKitchenCreated(int id) override;
 
     /**
-     * @brief Log the closure of a kitchen.
-     * @param id The id of the kitchen.
+     * @see ILogger::logKitchenClosed
      */
     void logKitchenClosed(int id) override;
 
     /**
-     * @brief Log the reception of a pizza by a kitchen.
-     * @param kitchenId The id of the kitchen.
-     * @param pizza The pizza received.
+     * @see ILogger::logPizzaSentToKitchen
      */
-    void logPizzaReceived(int kitchenId, const Pizza &pizza) override;
+    void logPizzaSentToKitchen(int kitchenId, const Pizza &pizza) override;
 
     /**
-     * @brief Log the start of cooking of a pizza by a kitchen.
-     * @param kitchenId The id of the kitchen.
-     * @param pizza The pizza cooked.
+     * @see ILogger::logPizzaReceivedByKitchen
+     */
+    void logPizzaReceivedByKitchen(int kitchenId, const Pizza &pizza) override;
+
+    /**
+     * @see ILogger::logPizzaCookingStarted
      */
     void logPizzaCookingStarted(int kitchenId, const Pizza &pizza) override;
 
     /**
-     * @brief Log the end of cooking of a pizza by a kitchen.
-     * @param kitchenId The id of the kitchen.
-     * @param pizza The pizza cooked.
+     * @see ILogger::logPizzaCooked
      */
     void logPizzaCooked(int kitchenId, const Pizza &pizza) override;
+
+    /**
+     * @see ILogger::logPizzaSentToReception
+     */
+    void logPizzaSentToReception(int kitchenId, const Pizza &pizza) override;
+
+    /**
+     * @see ILogger::logPizzaReceivedByReception
+     */
+    void logPizzaReceivedByReception(int kitchenId, const Pizza &pizza) override;
+
+    /**
+     * @see ILogger::logIngredientsStockUpdated
+     */
+    void logIngredientsStockUpdated(int kitchenId, const std::map<Pizza::Ingredient, Semaphore> &ingredients) override;
 
 private:
     void log(const std::string &msg);

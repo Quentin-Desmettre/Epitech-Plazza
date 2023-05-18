@@ -63,7 +63,7 @@ protected:
     //  The name of the named pipe.
     std::string _name;
     // The file descriptor of the named pipe.
-    int _fd;
+    int _fd = -1;
 
     OpenMode _mode;
 

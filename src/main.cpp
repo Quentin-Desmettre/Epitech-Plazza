@@ -7,6 +7,7 @@
 
 #include <string>
 #include <iostream>
+#include "Reception.hpp"
 
 enum PizzaType
 {
@@ -24,7 +25,6 @@ enum PizzaSize
     XL = 8 ,
     XXL = 16
 };
-#include "Reception.hpp"
 
 int main(int ac, char **av)
 {

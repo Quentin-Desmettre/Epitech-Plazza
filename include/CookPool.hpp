@@ -12,6 +12,9 @@
 #include <condition_variable>
 #include "pizza/Pizza.hpp"
 #include <thread>
+#include "Semaphore.hpp"
+
+class Kitchen;
 
 class CookPool {
 public:
@@ -22,12 +25,12 @@ public:
      * @param cooks The number of cooks.
      * @param multiplier The multiplier to apply to the cooking time.
      */
-    CookPool(int cooks, float multiplier);
+    CookPool(int cooks, float multiplier, const Kitchen &kitchen);
 
     /**
      * @brief Puts the requested pizza in a queue, then post on the semaphore.
      */
-    void addPizza(const Pizza &pizza);
+    void addPizza(Pizza pizza);
 
     /**
      * @brief The cook thread.
@@ -61,19 +64,27 @@ public:
      */
     void waitPizzaFinished();
 
+    using Ingredients = std::map<Pizza::Ingredient, Semaphore>;
+
+    Ingredients *getIngredients();
+
+    void waitForIngredients(const Pizza &pizza);
+
 private:
     std::queue<Pizza> _queue;
-    std::counting_semaphore<INT32_MAX> _pizzasToCook;
     std::vector<Pizza> _finishedPizzas;
     std::vector<std::thread> _cookers;
     std::condition_variable _pizzaFinished;
     std::mutex _mutex;
+    Semaphore _queuedPizzaSemaphore;
 
     std::mutex _pizzaInCookingMutex;
 
     int _pizzaInCooking;
     const int _cooks;
     const float _multiplier;
+    Ingredients _ingredients;
+    const Kitchen &_kitchen;
 };
 
 #endif //EPITECH_PLAZZA_COOKPOOL_HPP

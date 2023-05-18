@@ -3,12 +3,16 @@ project(Epitech_Plazza)
 
 set(CMAKE_CXX_STANDARD 20)
 
+
 include_directories(include)
 include_directories(include/ipc)
 include_directories(include/pizza)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+
 add_executable(Epitech_Plazza
-        src/main.cpp include/ProcessForker.hpp
+        src/main.cpp
+        include/ProcessForker.hpp
         include/Reception.hpp
         src/pizza/Pizza.cpp
         include/pizza/Pizza.hpp
@@ -32,5 +36,4 @@ add_executable(Epitech_Plazza
         src/logging/ILogger.cpp
         src/logging/CliLogger.cpp
         include/logging/CliLogger.hpp
-        tests/Test_CliLogger.cpp
-)
+        src/Semaphore.cpp)

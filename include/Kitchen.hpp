@@ -26,6 +26,7 @@
 class Kitchen {
 public:
     Kitchen(int cooks, int restockTimeMs, float multiplier);
+    ~Kitchen();
 
 ////////////////////////////////////////////////////////////////////////////////
 // Methods to be called from the forked process
@@ -88,6 +89,10 @@ public:
      */
     bool hasPizzaFinished();
 
+    /**
+     * @brief
+     * @return
+     */
     bool isKitchenClosed();
 
     /**
@@ -104,23 +109,29 @@ public:
      */
     void putTheKeyUnderTheDoor();
     void setProcess(Process process);
+    const Process &getProcess() const;
 
     /**
      * @brief Open ipcs.
      */
-    void openIpcs(InterProcessCom::OpenMode first, InterProcessCom::OpenMode second);
+    void openIpcs(bool isForked);
+
+    int getId() const;
 
 private:
-    std::unique_ptr<PizzaIPC> _readIpc, _writeIpc;
+    std::unique_ptr<PizzaIPC> _ipcParentToChild, _ipcChildToParent;
     const float _multiplier;
     const int _cooks;
     const int _restockTimeMs;
-    std::chrono::high_resolution_clock::time_point _timeoutClock;
-    pid_t _pid;
 
-    std::map<Pizza::Ingredient, int> _ingredients;
-    CookPool _cookPool;
+    bool _isCooking;
+    std::chrono::high_resolution_clock::time_point _timeoutClock;
+
+    std::unique_ptr<CookPool> _cookPool;
     Process _process;
+
+    int _id;
+    static int _maxId;
 };
 
 

@@ -35,7 +35,10 @@ public:
      * Steps:
      *  - check if there is data availabe on the std input
      *      => if so, parse user input
-     *  - for each kitchen, check if it has to close
+     *  - for each kitchen, check if it is doing something
+     *          if so, restart its clock
+     *          else, check if the clock > TIME_TO_DIE:
+     *              if so, kill the kitchen
      *  - for each kitchen, check if has a pizza cooked
      */
     void run();
@@ -73,10 +76,14 @@ private:
     void addKitchen();
     void runKitchen(Kitchen *kitchen);
 
+
+    void checkKitchen();
+    std::unique_ptr<Kitchen> *getKitchen();
+    void checkOrderAndSendPizzas();
     /**
      * @brief Dispatches pizzas to the kitchens.
      */
-    void dispatchPizzas();
+    void dispatchPizzas(std::vector<Pizza> &pizzas);
 };
 
 #endif //EPITECH_PLAZZA_RECEPTION_HPP

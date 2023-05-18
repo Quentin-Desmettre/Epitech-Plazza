@@ -6,36 +6,42 @@
 */
 
 #include "CookPool.hpp"
+#include "logging/ILogger.hpp"
+#include <iostream>
+#include "Kitchen.hpp"
 
-CookPool::CookPool(int cooks, float multiplier) : _pizzasToCook(0), _pizzaInCooking(0),
-    _cooks(cooks), _multiplier(multiplier)
+CookPool::CookPool(int cooks, float multiplier, const Kitchen &kitchen) : _queuedPizzaSemaphore(0),
+    _pizzaInCooking(0), _cooks(cooks), _multiplier(multiplier), _kitchen(kitchen)
 {
     for (int i = 0; i < _cooks; i++)
         _cookers.emplace_back(&CookPool::cookThread, this);
+    for (int i = 0; i < Pizza::Ingredient::IngredientCount; i++)
+        _ingredients[Pizza::Ingredient(i)] = Semaphore(5);
 }
 
-void CookPool::addPizza(const Pizza &pizza)
+void CookPool::addPizza(Pizza pizza)
 {
+    _pizzaInCookingMutex.lock();
     _queue.push(pizza);
-    _pizzasToCook.release();
+    _queuedPizzaSemaphore.increment();
+    _pizzaInCookingMutex.unlock();
 }
 
 void CookPool::cookThread()
 {
     while (true) {
-        _pizzasToCook.acquire();
-
+        _queuedPizzaSemaphore.decrement();
 
         _pizzaInCookingMutex.lock();
         auto pizza = _queue.front();
         _queue.pop();
         _pizzaInCooking++;
         _pizzaInCookingMutex.unlock();
+        waitForIngredients(pizza);
 
-        unsigned long test = pizza.getCookTime() * _multiplier * 1000;
-        std::this_thread::sleep_for(std::chrono::nanoseconds(test));
-        //TODO: Quentin tu suces ?
-
+        ILogger::getLogger().logPizzaCookingStarted(_kitchen.getId(), pizza);
+        std::this_thread::sleep_for(std::chrono::milliseconds((unsigned)(pizza.getCookTime() * _multiplier * 1000)));
+        ILogger::getLogger().logPizzaCooked(_kitchen.getId(), pizza);
 
         _pizzaInCookingMutex.lock();
         _pizzaInCooking--;
@@ -52,6 +58,9 @@ int CookPool::getPizzaInCooking() const
 
 std::vector<Pizza> CookPool::clearFinishedPizzas()
 {
+    if (_finishedPizzas.empty())
+        return {};
+
     std::vector<Pizza> pizzas;
     pizzas.swap(_finishedPizzas);
     return pizzas;
@@ -61,4 +70,15 @@ void CookPool::waitPizzaFinished()
 {
     std::unique_lock<std::mutex> lock(_mutex);
     _pizzaFinished.wait(lock);
+}
+
+CookPool::Ingredients *CookPool::getIngredients()
+{
+    return &_ingredients;
+}
+
+void CookPool::waitForIngredients(const Pizza &pizza)
+{
+    for (auto &ingredient : pizza.getIngredients())
+        _ingredients[ingredient].decrement();
 }

@@ -8,6 +8,7 @@
 #include "ipc/PizzaIPC.hpp"
 #include "pizza/PizzaEncoder.hpp"
 #include <memory>
+#include <iostream>
 
 void PizzaIPC::sendPizza(const Pizza &pizza)
 {

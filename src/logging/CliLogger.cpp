@@ -35,9 +35,14 @@ void CliLogger::logKitchenClosed(int id)
     log("Kitchen #" + std::to_string(id) + " closed");
 }
 
-void CliLogger::logPizzaReceived(int kitchenId, const Pizza &pizza)
+void CliLogger::logPizzaSentToKitchen(int kitchenId, const Pizza &pizza)
 {
-    log("Kitchen #" + std::to_string(kitchenId) + " received " + pizza.toString());
+    log("Sent " + pizza.toString() + " to kitchen #" + std::to_string(kitchenId));
+}
+
+void CliLogger::logPizzaReceivedByKitchen(int kitchenId, const Pizza &pizza)
+{
+    log("Kitchen #" + std::to_string(kitchenId) + " received " + pizza.toString() + " from reception");
 }
 
 void CliLogger::logPizzaCookingStarted(int kitchenId, const Pizza &pizza)
@@ -48,4 +53,25 @@ void CliLogger::logPizzaCookingStarted(int kitchenId, const Pizza &pizza)
 void CliLogger::logPizzaCooked(int kitchenId, const Pizza &pizza)
 {
     log("Kitchen #" + std::to_string(kitchenId) + " cooked " + pizza.toString());
+}
+
+void CliLogger::logPizzaSentToReception(int kitchenId, const Pizza &pizza)
+{
+    log("Kitchen #" + std::to_string(kitchenId) + " sent " + pizza.toString() + " to reception");
+}
+
+void CliLogger::logPizzaReceivedByReception(int kitchenId, const Pizza &pizza)
+{
+    log("Reception received " + pizza.toString() + " from kitchen #" + std::to_string(kitchenId));
+}
+
+void CliLogger::logIngredientsStockUpdated(int kitchenId, const std::map<Pizza::Ingredient, Semaphore> &ingredients)
+{
+    std::string msg = "Kitchen #" + std::to_string(kitchenId) + " ingredients stock updated: ";
+    for (auto it = ingredients.begin(); it != ingredients.end(); ++it) {
+        msg += std::to_string(it->first) /*Pizza::ingredientToString(it->first)*/ + ": " + std::to_string(it->second.getValue());
+        if (std::next(it) != ingredients.end())
+            msg += ", ";
+    }
+    log(msg);
 }

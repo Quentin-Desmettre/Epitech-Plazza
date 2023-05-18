@@ -9,10 +9,10 @@
 #include "pizza/PizzaFactory.hpp"
 
 std::map<std::string, Pizza::PizzaType> ParsePizza::_pizzaTypeMap = {
-        {"Regina", Pizza::PizzaType::Regina},
-        {"Margarita", Pizza::PizzaType::Margarita},
-        {"Americana", Pizza::PizzaType::Americana},
-        {"Fantasia", Pizza::PizzaType::Fantasia}
+        {"regina", Pizza::PizzaType::Regina},
+        {"margarita", Pizza::PizzaType::Margarita},
+        {"americana", Pizza::PizzaType::Americana},
+        {"fantasia", Pizza::PizzaType::Fantasia}
 };
 
 std::map<std::string, Pizza::PizzaSize> ParsePizza::_pizzaSizeMap = {
@@ -34,6 +34,7 @@ bool ParsePizza::CreatePizza(std::string &pizzaName, std::string &pizzaSize,
         _pizzas.clear();
         return false;
     }
+    std::transform(pizzaName.begin(), pizzaName.end(), pizzaName.begin(), ::tolower);
     Pizza::PizzaType type = _pizzaTypeMap[pizzaName];
     Pizza::PizzaSize size = _pizzaSizeMap[pizzaSize];
 
@@ -71,7 +72,7 @@ bool ParsePizza::CheckInput()
 
 void ParsePizza::SplitInput(std::string &input)
 {
-    std::string delimiter = " ; ";
+    std::string delimiter = "; ";
     size_t pos = input.find(delimiter);
     std::string token;
 

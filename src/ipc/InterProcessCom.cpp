@@ -10,10 +10,13 @@
 #include <sys/stat.h>
 #include <stdexcept>
 #include <fcntl.h>
-#include <csignal>
 #include <algorithm>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <cerrno>
+#include <cmath>
+#include <cstring>
+#include <iostream>
 
 std::vector<std::string> InterProcessCom::_pipes;
 
@@ -46,11 +49,11 @@ InterProcessCom::~InterProcessCom()
 void InterProcessCom::open(InterProcessCom::OpenMode mode)
 {
     if (_fd != -1)
-        ::close(_fd);
+        this->close();
     _fd = ::open(_name.c_str(), mode == READ ? O_RDONLY : O_WRONLY);
     _mode = mode;
     if (_fd == -1)
-        throw std::runtime_error("Cannot open named pipe");
+        throw std::runtime_error("Cannot open named pipe" + std::string(std::strerror(errno)));
 }
 
 void InterProcessCom::close()
@@ -70,7 +73,7 @@ void InterProcessCom::write(const void *data, size_t size) const
     while (written < size) {
         ssize_t ret = ::write(_fd, (char *)data + written, size - written);
         if (ret == -1)
-            throw std::runtime_error("Cannot write to named pipe");
+            throw std::runtime_error("Cannot write to named pipe" + std::string(std::strerror(errno)));
         written += ret;
     }
 }
