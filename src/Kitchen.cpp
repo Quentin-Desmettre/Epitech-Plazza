@@ -81,7 +81,7 @@ void Kitchen::awaitForCommand()
 
 int Kitchen::getPizzasAwaiting() const
 {
-    return _cookPool->getPizzaInCooking();
+    return _pizzasAwaiting;
 }
 
 int Kitchen::getCapacity() const
@@ -91,6 +91,7 @@ int Kitchen::getCapacity() const
 
 void Kitchen::addPizza(const Pizza &pizza)
 {
+    _pizzasAwaiting++;
     _ipcParentToChild->sendPizza(pizza);
 }
 
@@ -112,6 +113,7 @@ bool Kitchen::isKitchenClosed()
 
 Pizza Kitchen::getPizza()
 {
+    _pizzasAwaiting--;
     return _ipcChildToParent->receivePizza();
 }
 

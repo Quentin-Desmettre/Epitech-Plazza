@@ -132,6 +132,7 @@ private:
 
     int _id;
     static int _maxId;
+    unsigned int _pizzasAwaiting;
 };
 
 
