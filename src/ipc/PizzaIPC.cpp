@@ -50,3 +50,14 @@ bool PizzaIPC::hasPizza()
         return false;
     return true;
 }
+
+void PizzaIPC::notifyMessageReceived()
+{
+    InterProcessCom::write("1", 1);
+}
+
+void PizzaIPC::waitForNotification()
+{
+    char buffer;
+    InterProcessCom::read(&buffer, 1);
+}

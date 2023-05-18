@@ -17,8 +17,8 @@
 class InterProcessCom {
 public:
     enum OpenMode {
-        READ,
-        WRITE
+        CREATE_SOCKET,
+        CONNECT_SOCKET
     };
     /**
      * @brief Create a named pipe, placed in /tmp/Plazza.
@@ -54,13 +54,21 @@ public:
 
     std::string getPipeName() const;
 
+    class PipeException: public std::exception {
+    public:
+        PipeException();
+
+        ~PipeException() override = default;
+    };
+    static void handleSigPipe(int);
+
 protected:
     [[nodiscard]] int bytesAvailable() const;
 
-    // List of every named pipe created.
-    static std::vector<std::string> _pipes;
+    // List of every unix socket created, to delete them when the program exits.
+    static std::vector<std::string> _socketNames;
 
-    //  The name of the named pipe.
+    //  The name of the unix socket
     std::string _name;
     // The file descriptor of the named pipe.
     int _fd = -1;
@@ -68,7 +76,7 @@ protected:
     OpenMode _mode;
 
 private:
-    static void erasePipes() __attribute__((destructor));
+    static void eraseSockets() __attribute__((destructor));
 };
 
 #endif //EPITECH_PLAZZA_INTERPROCESSCOM_HPP
