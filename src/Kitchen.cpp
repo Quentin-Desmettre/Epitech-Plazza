@@ -43,7 +43,7 @@ void Kitchen::run()
         ILogger::getLogger().logPizzaSentToReception(_id, pizza);
         _ipcChildToParent->sendPizza(pizza);
 
-        if (_cookPool->getPizzaInCooking() == 0) {
+        if (_pizzaCounter == 0) {
             _lastOrderTime = std::chrono::high_resolution_clock::now();
             std::thread(
             [](Kitchen *kitchen) {
