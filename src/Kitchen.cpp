@@ -6,7 +6,6 @@
 */
 
 #include "Kitchen.hpp"
-#include <iostream>
 #include "logging/ILogger.hpp"
 
 int Kitchen::_maxId = 0;
@@ -18,6 +17,7 @@ Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _ipcParentToC
     _timeoutClock = std::chrono::high_resolution_clock::now();
     _ipcChildToParent = std::make_unique<PizzaIPC>();
     _ipcParentToChild = std::make_unique<PizzaIPC>();
+    _isForked = false;
 }
 
 Kitchen::~Kitchen()
@@ -28,18 +28,15 @@ Kitchen::~Kitchen()
 void Kitchen::run()
 {
     _cookPool = std::make_unique<CookPool>(_cooks, _multiplier, *this);
-    std::thread refillThread(&Kitchen::checkForRefill, this);
-    std::thread commandThread(&Kitchen::awaitForCommand, this);
+    std::thread refillThread(&Kitchen::checkForRefill, this);   // Check for refill of ingredients
+    std::thread commandThread(&Kitchen::awaitForCommand, this); // Await for command from reception
 
+    // Await finished pizzas and send them to reception
     while (true) {
         Pizza pizza = _cookPool->getFinishedPizzas().pop();
         ILogger::getLogger().logPizzaSentToReception(_id, pizza);
         _ipcChildToParent->sendPizza(pizza);
-
-        if (_cookPool->getPizzaInCooking() == 0) {
-            _isCooking = false;
-            _timeoutClock = std::chrono::high_resolution_clock::now();
-        }
+        // TODO: launch timeout here
     }
 }
 
@@ -59,13 +56,11 @@ void Kitchen::checkForRefill()
 void Kitchen::awaitForCommand()
 {
     while (true) {
-        if (_ipcParentToChild->hasPizza()) {
-            Pizza pizza = _ipcParentToChild->receivePizza();
-            ILogger::getLogger().logPizzaReceivedByKitchen(_id, pizza);
-
-            _cookPool->addPizza(pizza);
-            _isCooking = true;
-        }
+        InterProcessCom::waitForDataAvailable(*_ipcParentToChild);
+        Pizza pizza = _ipcParentToChild->receivePizza();
+        ILogger::getLogger().logPizzaReceivedByKitchen(_id, pizza);
+        _cookPool->addPizza(pizza);
+        _isCooking = true;
     }
 }
 
@@ -129,9 +124,17 @@ void Kitchen::openIpcs(bool isForked)
         _ipcChildToParent->open(InterProcessCom::OpenMode::READ);
         _ipcParentToChild->open(InterProcessCom::OpenMode::WRITE);
     }
+    _isForked = isForked;
 }
 
 int Kitchen::getId() const
 {
     return _id;
+}
+
+const InterProcessCom &Kitchen::getReadIpc() const
+{
+    if (_isForked)
+        return *_ipcParentToChild;
+    return *_ipcChildToParent;
 }

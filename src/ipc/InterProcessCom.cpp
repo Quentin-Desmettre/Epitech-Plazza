@@ -12,12 +12,12 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <cerrno>
-#include <iostream>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <csignal>
 #include <fcntl.h>
 #include <cstring>
+#include "Kitchen.hpp"
 
 std::vector<std::string> InterProcessCom::_pipes;
 
@@ -142,4 +142,40 @@ std::string InterProcessCom::getPipeName() const
 void InterProcessCom::handleSigPipe(int)
 {
     throw InterProcessCom::PipeException();
+}
+
+const std::unique_ptr<Kitchen> *InterProcessCom::waitForDataAvailable(InterProcessCom::InputSource &source, const std::vector<std::unique_ptr<Kitchen>> &kitchens)
+{
+    fd_set readfds;
+
+    // Create fd set
+    FD_ZERO(&readfds);
+    FD_SET(0, &readfds);
+    for (auto &kitchen : kitchens)
+        FD_SET(kitchen->getReadIpc()._fd, &readfds);
+
+    // Wait for data
+    if (select(FD_SETSIZE, &readfds, nullptr, nullptr, nullptr) == -1)
+        throw std::runtime_error("Cannot select. Reason: " + std::string(strerror(errno)));
+
+    // Return the kitchen that has data available
+    if (FD_ISSET(0, &readfds)) {
+        source = InputSource::STDIN;
+        return nullptr;
+    }
+    source = InputSource::KITCHEN;
+    for (auto &kitchen : kitchens)
+        if (FD_ISSET(kitchen->getReadIpc()._fd, &readfds))
+            return &kitchen;
+    return nullptr;
+}
+
+void InterProcessCom::waitForDataAvailable(const InterProcessCom &com)
+{
+    fd_set readfds;
+
+    FD_ZERO(&readfds);
+    FD_SET(com._fd, &readfds);
+    if (select(FD_SETSIZE, &readfds, nullptr, nullptr, nullptr) == -1)
+        throw std::runtime_error("Cannot select. Reason: " + std::string(strerror(errno)));
 }

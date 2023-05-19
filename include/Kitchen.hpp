@@ -116,6 +116,8 @@ public:
      */
     void openIpcs(bool isForked);
 
+    const InterProcessCom &getReadIpc() const;
+
     int getId() const;
 
     bool _close = false;
@@ -130,6 +132,7 @@ private:
     const int _restockTimeMs;
 
     bool _isCooking;
+    bool _isForked;
     std::chrono::high_resolution_clock::time_point _timeoutClock;
 
     std::unique_ptr<CookPool> _cookPool;

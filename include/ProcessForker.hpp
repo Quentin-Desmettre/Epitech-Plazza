@@ -63,7 +63,6 @@ public:
     {
         if (!_isRunnning)
             return;
-        std::cout << "pid: " << _pid << std::endl;
         ::kill(_pid, SIGKILL);
         _isRunnning = false;
     }

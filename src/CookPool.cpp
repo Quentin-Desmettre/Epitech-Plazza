@@ -31,7 +31,7 @@ void CookPool::cookThread()
 
         // Fetch a pizza
         auto pizza = _queue.pop();
-        (*_pizzaInCooking.wait())++;
+        (*_pizzaInCooking.wait())++; // Increment the number of pizza in cooking
         _pizzaInCooking.signal();
 
         // Cook it

@@ -10,6 +10,9 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
+
+class Kitchen;
 
 /**
  * @brief Encapsulate the communication between processes, using a named pipe.
@@ -20,6 +23,12 @@ public:
         READ,
         WRITE
     };
+
+    enum InputSource {
+        STDIN,
+        KITCHEN
+    };
+
     /**
      * @brief Create a named pipe, placed in /tmp/Plazza.
      */
@@ -54,13 +63,11 @@ public:
 
     std::string getPipeName() const;
 
-    class PipeException: public std::exception {
-    public:
-        PipeException();
-
-        ~PipeException() override = default;
-    };
+    class PipeException: public std::exception {};
     static void handleSigPipe(int);
+
+    static const std::unique_ptr<Kitchen> *waitForDataAvailable(InputSource &source, const std::vector<std::unique_ptr<Kitchen>> &kitchens);
+    static void waitForDataAvailable(const InterProcessCom &com);
 
 protected:
     [[nodiscard]] int bytesAvailable() const;

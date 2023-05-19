@@ -8,9 +8,11 @@
 #include "logging/CliLogger.hpp"
 #include <chrono>
 
-CliLogger::CliLogger():
-    _file("plazza.log")
+CliLogger::CliLogger()
 {
+    auto file = _file.wait();
+    file->open("plazza.log", std::ios::out | std::ios::trunc);
+    _file.signal();
 }
 
 void CliLogger::log(const std::string &msg)
@@ -21,8 +23,12 @@ void CliLogger::log(const std::string &msg)
     auto now_tm = std::localtime(&now_c);
     char buffer[9];
     std::strftime(buffer, 9, "%T", now_tm);
-    _file << "[" << buffer << "] " << msg << std::endl;
-    _file.flush();
+
+    // Write to file
+    auto file = _file.wait();
+    *file << "[" << buffer << "] " << msg << std::endl;
+    file->flush();
+    _file.signal();
 }
 
 void CliLogger::logKitchenCreated(int id)
