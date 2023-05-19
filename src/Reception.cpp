@@ -84,7 +84,7 @@ void Reception::checkKitchen()
     bool kitchensFull = true;
 
     for (auto &kitchen : _kitchens)
-        if (kitchen->_counter != kitchen->getCapacity()) {
+        if (kitchen->getPizzasAwaiting() != kitchen->getCapacity()) {
             kitchensFull = false;
             break;
         }
@@ -95,14 +95,16 @@ void Reception::checkKitchen()
 std::unique_ptr<Kitchen> *Reception::getKitchen()
 {
     std::unique_ptr<Kitchen> *ref = &_kitchens.back();
-    //TODO: change la getPizzaAwaiting
-    int actualSize = (*ref)->getCapacity() - (*ref)->_counter;
+    int actualSize = (*ref)->getCapacity() - (*ref)->getPizzasAwaiting();
 
     for (auto &kitchen : _kitchens) {
-        //TODO: change la getPizzaAwaiting
-        int size = kitchen->getCapacity() - kitchen->_counter;
-        if (size < actualSize && !kitchen->isKitchenClosed())
+        int size = kitchen->getCapacity() - kitchen->getPizzasAwaiting();
+        if (size > 0 && size < actualSize && !kitchen->isKitchenClosed())
             ref = &kitchen;
+    }
+    if (actualSize <= 0) {
+        addKitchen();
+        ref = &_kitchens.back();
     }
     return ref;
 }
@@ -112,10 +114,8 @@ void Reception::checkOrderAndSendPizzas()
     std::vector<Pizza> pizzas = getPizzasToCook();
 
     if (pizzas.empty()) {
-        std::cout << "Order error" << std::endl;
         return;
     }
-    std::cout << "New order" << std::endl;
     dispatchPizzas(pizzas);
 }
 
@@ -123,7 +123,8 @@ void Reception::dispatchPizzas(std::vector<Pizza> &pizzas)
 {
     for (auto &pizza : pizzas) {
         checkKitchen();
-        ILogger::getLogger().logPizzaSentToKitchen(_kitchens.back()->getId(), pizza);
-        (*getKitchen())->addPizza(pizza);
+        std::unique_ptr<Kitchen> *kitchen = getKitchen();
+        ILogger::getLogger().logPizzaSentToKitchen(kitchen->get()->getId(), pizza);
+        kitchen->get()->addPizza(pizza);
     }
 }

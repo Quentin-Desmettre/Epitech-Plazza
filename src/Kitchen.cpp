@@ -10,7 +10,14 @@
 
 int Kitchen::_maxId = 0;
 
-Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _ipcParentToChild(nullptr), _ipcChildToParent(nullptr), _multiplier(multiplier), _cooks(cooks), _restockTimeMs(restockTimeMs), _isCooking(false), _cookPool(nullptr)
+Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier):
+    _ipcParentToChild(nullptr),
+    _ipcChildToParent(nullptr),
+    _multiplier(multiplier),
+    _cooks(cooks),
+    _restockTimeMs(restockTimeMs),
+    _isCooking(false),
+    _cookPool(nullptr)
 {
     _id = _maxId;
     _maxId++;
@@ -66,7 +73,9 @@ void Kitchen::awaitForCommand()
 
 int Kitchen::getPizzasAwaiting() const
 {
-    return _cookPool->getPizzaInCooking();
+    if (_isForked)
+        return _cookPool->getPizzaInCooking();
+    return _counter;
 }
 
 int Kitchen::getCapacity() const
