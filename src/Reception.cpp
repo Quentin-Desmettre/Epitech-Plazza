@@ -9,6 +9,7 @@
 #include "ProcessForker.hpp"
 #include "logging/ILogger.hpp"
 #include "logging/CliLogger.hpp"
+#include <future>
 
 Reception::Reception(int ac, char **av)
 {
@@ -40,32 +41,22 @@ std::vector<Pizza> Reception::getPizzasToCook()
     return _parser.GetPizzas();
 }
 
-// TODO noa mets moi ça dans une classe
-#include <sys/ioctl.h>
-int bytesAvailable(int fd)
-{
-    int bytes = 0;
-
-    if (ioctl(fd, FIONREAD, &bytes) == -1)
-        throw std::runtime_error("Cannot get number of bytes available");
-    return bytes;
-}
-
 void Reception::run()
 {
+    InterProcessCom::InputSource inputSource;
+
     while (true) {
-        if (bytesAvailable(0) > 0) {
+        auto uniqueKitchen = InterProcessCom::waitForDataAvailable(inputSource, _kitchens);
+
+        if (!uniqueKitchen && inputSource != InterProcessCom::STDIN)
+            continue;
+        if (inputSource == InterProcessCom::STDIN) {
             checkOrderAndSendPizzas();
+            continue;
         }
-        for (auto &kitchen : _kitchens) {
-            //if (kitchen->isKitchenClosed()) {
-             //   kitchen->putTheKeyUnderTheDoor();
-            //}
-            if (kitchen->hasPizzaFinished()) {
-                auto pizza = kitchen->getPizza();
-                ILogger::getLogger().logPizzaReceivedByReception(kitchen->getId(), pizza);
-            }
-        }
+        auto kitchen = uniqueKitchen->get();
+        auto pizza = kitchen->getPizza();
+        ILogger::getLogger().logPizzaReceivedByReception(kitchen->getId(), pizza);
     }
 }
 
@@ -79,9 +70,9 @@ void Reception::addKitchen()
 {
     std::unique_ptr<Kitchen> kitchen = std::make_unique<Kitchen>(_cooksPerKitchen, _restockTimeMs, _multiplier);
 
-    Process process;
+    auto *process = new Process();
     kitchen->setProcess(process);
-    process.runObject(this, &Reception::runKitchen, kitchen.get());
+    process->runObject(this, &Reception::runKitchen, kitchen.get());
     kitchen->openIpcs(false);
 
     ILogger::getLogger().logKitchenCreated(kitchen->getId());
@@ -108,8 +99,12 @@ std::unique_ptr<Kitchen> *Reception::getKitchen()
 
     for (auto &kitchen : _kitchens) {
         int size = kitchen->getCapacity() - kitchen->getPizzasAwaiting();
-        if (size < actualSize && !kitchen->isKitchenClosed())
+        if (size > 0 && size < actualSize && !kitchen->isKitchenClosed())
             ref = &kitchen;
+    }
+    if (actualSize <= 0) {
+        addKitchen();
+        ref = &_kitchens.back();
     }
     return ref;
 }
@@ -119,10 +114,8 @@ void Reception::checkOrderAndSendPizzas()
     std::vector<Pizza> pizzas = getPizzasToCook();
 
     if (pizzas.empty()) {
-        std::cout << "Order error" << std::endl;
         return;
     }
-    std::cout << "New order" << std::endl;
     dispatchPizzas(pizzas);
 }
 
@@ -130,8 +123,8 @@ void Reception::dispatchPizzas(std::vector<Pizza> &pizzas)
 {
     for (auto &pizza : pizzas) {
         checkKitchen();
-        ILogger::getLogger().logPizzaSentToKitchen(_kitchens.back()->getId(), pizza);
-        getKitchen();
-        std::cout << "Dispatching pizza " << pizza.getType() << std::endl;
+        std::unique_ptr<Kitchen> *kitchen = getKitchen();
+        ILogger::getLogger().logPizzaSentToKitchen(kitchen->get()->getId(), pizza);
+        kitchen->get()->addPizza(pizza);
     }
 }

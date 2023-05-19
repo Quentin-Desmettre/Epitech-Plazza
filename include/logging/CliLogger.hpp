@@ -8,6 +8,7 @@
 #ifndef EPITECH_PLAZZA_CLILOGGER_HPP
 #define EPITECH_PLAZZA_CLILOGGER_HPP
 #include "logging/ILogger.hpp"
+#include "ConditionalVariable.hpp"
 #include <fstream>
 
 class CliLogger: public ILogger {
@@ -60,7 +61,7 @@ public:
 private:
     void log(const std::string &msg);
 
-    std::ofstream _file;
+    ConditionalVariable<std::ofstream> _file;
 };
 
 #endif //EPITECH_PLAZZA_CLILOGGER_HPP

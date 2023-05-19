@@ -45,7 +45,10 @@ public:
     void run();
 
     void checkForRefill();
-    void awaitFinishedCook();
+
+    void close() {
+        _process->kill();
+    }
 
     /**
      * @brief Waits for a command from the reception.
@@ -53,8 +56,6 @@ public:
      * Will call CookPool::addPizza
      */
     void awaitForCommand();
-
-    bool canCookPizza(const Pizza &pizza);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Methods to be called from the reception
@@ -108,15 +109,22 @@ public:
      * @brief Closes the kitchen.
      */
     void putTheKeyUnderTheDoor();
-    void setProcess(Process process);
-    const Process &getProcess() const;
+    void setProcess(Process *process);
 
     /**
      * @brief Open ipcs.
      */
     void openIpcs(bool isForked);
 
+    const InterProcessCom &getReadIpc() const;
+
     int getId() const;
+
+    bool _close = false;
+    int _pizzaCounter;
+
+    // Last order time
+    std::chrono::high_resolution_clock::time_point _lastOrderTime;
 
 private:
     std::unique_ptr<PizzaIPC> _ipcParentToChild, _ipcChildToParent;
@@ -124,11 +132,10 @@ private:
     const int _cooks;
     const int _restockTimeMs;
 
-    std::chrono::high_resolution_clock::time_point _lastPizzaFinished;
-    Semaphore _pizzaCounter;
+    bool _isForked;
 
     std::unique_ptr<CookPool> _cookPool;
-    Process _process;
+    Process *_process;
 
     int _id;
     static int _maxId;

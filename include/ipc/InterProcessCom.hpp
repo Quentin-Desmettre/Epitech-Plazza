@@ -10,6 +10,9 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
+
+class Kitchen;
 
 /**
  * @brief Encapsulate the communication between processes, using a named pipe.
@@ -17,9 +20,15 @@
 class InterProcessCom {
 public:
     enum OpenMode {
-        CREATE_SOCKET,
-        CONNECT_SOCKET
+        READ,
+        WRITE
     };
+
+    enum InputSource {
+        STDIN,
+        KITCHEN
+    };
+
     /**
      * @brief Create a named pipe, placed in /tmp/Plazza.
      */
@@ -54,19 +63,17 @@ public:
 
     std::string getPipeName() const;
 
-    class PipeException: public std::exception {
-    public:
-        PipeException();
-
-        ~PipeException() override = default;
-    };
+    class PipeException: public std::exception {};
     static void handleSigPipe(int);
+
+    static const std::unique_ptr<Kitchen> *waitForDataAvailable(InputSource &source, const std::vector<std::unique_ptr<Kitchen>> &kitchens);
+    static void waitForDataAvailable(const InterProcessCom &com);
 
 protected:
     [[nodiscard]] int bytesAvailable() const;
 
     // List of every unix socket created, to delete them when the program exits.
-    static std::vector<std::string> _socketNames;
+    static std::vector<std::string> _pipes;
 
     //  The name of the unix socket
     std::string _name;
@@ -76,7 +83,7 @@ protected:
     OpenMode _mode;
 
 private:
-    static void eraseSockets() __attribute__((destructor));
+    static void erasePipes() __attribute__((destructor));
 };
 
 #endif //EPITECH_PLAZZA_INTERPROCESSCOM_HPP

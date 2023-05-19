@@ -13,6 +13,7 @@
 #include "pizza/Pizza.hpp"
 #include <thread>
 #include "Semaphore.hpp"
+#include "pizza/PizzaQueue.hpp"
 
 class Kitchen;
 
@@ -51,36 +52,20 @@ public:
      */
     int getPizzaInCooking() const;
 
-    /**
-     * @brief Clear the list of finished pizzas.
-     * @return A vector of cooked pizzas.
-     */
-    [[nodiscard]] std::vector<Pizza> clearFinishedPizzas();
-
-    /**
-     * @brief Waits for a pizza to be finished.
-     *
-     * It achieves this by waiting on the conditional variable.
-     */
-    void waitPizzaFinished();
-
     using Ingredients = std::map<Pizza::Ingredient, Semaphore>;
 
     Ingredients *getIngredients();
 
-    void waitForIngredients(const Pizza &pizza);
+    void consumeIngredients(const Pizza &pizza);
+
+    PizzaQueue &getFinishedPizzas();
 
 private:
-    std::queue<Pizza> _queue;
-    std::vector<Pizza> _finishedPizzas;
+    PizzaQueue _queue;
+    PizzaQueue _finishedPizzas;
     std::vector<std::thread> _cookers;
-    std::condition_variable _pizzaFinished;
-    std::mutex _mutex;
-    Semaphore _queuedPizzaSemaphore;
 
-    std::mutex _pizzaInCookingMutex;
-
-    int _pizzaInCooking;
+    mutable ConditionalVariable<int> _pizzaInCooking;
     const int _cooks;
     const float _multiplier;
     Ingredients _ingredients;

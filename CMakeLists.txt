@@ -36,4 +36,4 @@ add_executable(Epitech_Plazza
         src/logging/ILogger.cpp
         src/logging/CliLogger.cpp
         include/logging/CliLogger.hpp
-        src/Semaphore.cpp)
+        src/Semaphore.cpp include/ConditionalVariable.hpp src/pizza/PizzaQueue.cpp include/pizza/PizzaQueue.hpp)

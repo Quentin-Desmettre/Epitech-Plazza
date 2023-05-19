@@ -8,6 +8,7 @@
 #ifndef EPITECH_PLAZZA_PROCESSFORKER_HPP
 #define EPITECH_PLAZZA_PROCESSFORKER_HPP
 #include <unistd.h>
+#include <iostream>
 #include <cstdlib>
 #include <utility>
 #include <stdexcept>
@@ -53,7 +54,7 @@ public:
     void join()
     {
         if (!_isRunnning)
-            throw std::runtime_error("Process not running");
+            throw std::runtime_error("Process not running");a
         waitpid(_pid, nullptr, 0);
         _isRunnning = false;
     }
@@ -62,7 +63,8 @@ public:
     {
         if (!_isRunnning)
             return;
-        ::kill(_pid, SIGKILL);
+//        ::kill(_pid, SIGKILL);
+        exit(0);
         _isRunnning = false;
     }
 
