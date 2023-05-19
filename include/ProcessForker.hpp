@@ -8,6 +8,7 @@
 #ifndef EPITECH_PLAZZA_PROCESSFORKER_HPP
 #define EPITECH_PLAZZA_PROCESSFORKER_HPP
 #include <unistd.h>
+#include <iostream>
 #include <cstdlib>
 #include <utility>
 #include <stdexcept>
@@ -62,6 +63,7 @@ public:
     {
         if (!_isRunnning)
             return;
+        std::cout << "pid: " << _pid << std::endl;
         ::kill(_pid, SIGKILL);
         _isRunnning = false;
     }

@@ -9,6 +9,7 @@
 #include "ProcessForker.hpp"
 #include "logging/ILogger.hpp"
 #include "logging/CliLogger.hpp"
+#include <future>
 
 Reception::Reception(int ac, char **av)
 {
@@ -53,7 +54,14 @@ int bytesAvailable(int fd)
 
 void Reception::run()
 {
+    std::thread getInputThread(&Reception::dispatchPizzas, this);
+
+    // TODO: select on 0, and read fds of kitchens
+    // TODO: make everything as blocking as possible
+    int fds[2];
+    pipe(fds);
     while (true) {
+<<<<<<< Updated upstream
         if (bytesAvailable(0) > 0) {
             checkOrderAndSendPizzas();
         }
@@ -62,8 +70,39 @@ void Reception::run()
              //   kitchen->putTheKeyUnderTheDoor();
             //}
             if (kitchen->hasPizzaFinished()) {
+=======
+        // void getFirstInputSourceAvailable(Type &type, vector<kitchen>, fds[1]);
+        enum type {
+            STDIN,
+            KITCHEN,
+            PIPE
+        };
+        for (auto it = _kitchens.begin(); it != _kitchens.end(); it++) {
+            auto kitchen = it->get();
+            if (kitchen->_close) {
+                kitchen->close();
+                _kitchens.erase(it);
+                it = _kitchens.begin() - 1;
+                ILogger::getLogger().logKitchenClosed(kitchen->getId());
+            } else if (kitchen->hasPizzaFinished()) {
+>>>>>>> Stashed changes
                 auto pizza = kitchen->getPizza();
                 ILogger::getLogger().logPizzaReceivedByReception(kitchen->getId(), pizza);
+                if (kitchen->_counter != 0) // TODO: counter en semaphore
+                    continue;
+                std::thread(
+                    [fds](Kitchen *kitchen) {
+                        // Sleep for 5 seconds
+                        char c;
+                        std::this_thread::sleep_for(std::chrono::seconds(5));
+                        auto now = std::chrono::high_resolution_clock::now();
+                        auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - kitchen->_lastOrderTime).count();
+                        if (diff >= 4995) { // Error margin
+                            kitchen->putTheKeyUnderTheDoor(); // TODO: write on a fd that indicates we have to check if every kitchen is closed
+                            ::write(fds[0], &c, 1);
+                        }
+                   },
+                it->get()).detach();
             }
         }
     }
@@ -79,9 +118,9 @@ void Reception::addKitchen()
 {
     std::unique_ptr<Kitchen> kitchen = std::make_unique<Kitchen>(_cooksPerKitchen, _restockTimeMs, _multiplier);
 
-    Process process;
+    auto *process = new Process();
     kitchen->setProcess(process);
-    process.runObject(this, &Reception::runKitchen, kitchen.get());
+    process->runObject(this, &Reception::runKitchen, kitchen.get());
     kitchen->openIpcs(false);
 
     ILogger::getLogger().logKitchenCreated(kitchen->getId());
@@ -118,14 +157,16 @@ std::unique_ptr<Kitchen> *Reception::getKitchen()
 
 void Reception::checkOrderAndSendPizzas()
 {
-    std::vector<Pizza> pizzas = getPizzasToCook();
+    while (true) {
+        std::vector<Pizza> pizzas = getPizzasToCook();
 
-    if (pizzas.empty()) {
-        std::cout << "Order error" << std::endl;
-        return;
+        if (pizzas.empty()) {
+            std::cout << "Order error" << std::endl;
+            return;
+        }
+        std::cout << "New order" << std::endl;
+        dispatchPizzas(pizzas);
     }
-    std::cout << "New order" << std::endl;
-    dispatchPizzas(pizzas);
 }
 
 void Reception::dispatchPizzas(std::vector<Pizza> &pizzas)

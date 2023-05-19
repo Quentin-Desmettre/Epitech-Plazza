@@ -22,7 +22,7 @@ Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) : _ipcParentToC
 
 Kitchen::~Kitchen()
 {
-    _process.kill();
+    _process->kill();
 }
 
 void Kitchen::run()
@@ -30,11 +30,17 @@ void Kitchen::run()
     _cookPool = std::make_unique<CookPool>(_cooks, _multiplier, *this);
     std::thread refillThread(&Kitchen::checkForRefill, this);
     std::thread commandThread(&Kitchen::awaitForCommand, this);
-    std::thread cookThread(&Kitchen::awaitFinishedCook, this);
 
-    refillThread.join();
-    commandThread.join();
-    cookThread.join();
+    while (true) {
+        Pizza pizza = _cookPool->getFinishedPizzas().pop();
+        ILogger::getLogger().logPizzaSentToReception(_id, pizza);
+        _ipcChildToParent->sendPizza(pizza);
+
+        if (_cookPool->getPizzaInCooking() == 0) {
+            _isCooking = false;
+            _timeoutClock = std::chrono::high_resolution_clock::now();
+        }
+    }
 }
 
 void Kitchen::checkForRefill()
@@ -47,22 +53,6 @@ void Kitchen::checkForRefill()
         for (auto &ingredient : *ingredients)
             ingredient.second.increment();
         ILogger::getLogger().logIngredientsStockUpdated(_id, *ingredients);
-    }
-}
-
-void Kitchen::awaitFinishedCook()
-{
-    while (true) {
-        std::vector<Pizza> finishedPizzas = _cookPool->clearFinishedPizzas();
-
-        for (auto &pizza : finishedPizzas) {
-            ILogger::getLogger().logPizzaSentToReception(_id, pizza);
-            _ipcChildToParent->sendPizza(pizza);
-        }
-        if (_cookPool->getPizzaInCooking() == 0) {
-            _isCooking = false;
-            _timeoutClock = std::chrono::high_resolution_clock::now();
-        }
     }
 }
 
@@ -91,6 +81,8 @@ int Kitchen::getCapacity() const
 
 void Kitchen::addPizza(const Pizza &pizza)
 {
+    _counter++;
+    _lastOrderTime = std::chrono::high_resolution_clock::now();
     _ipcParentToChild->sendPizza(pizza);
 }
 
@@ -112,15 +104,18 @@ bool Kitchen::isKitchenClosed()
 
 Pizza Kitchen::getPizza()
 {
-    return _ipcChildToParent->receivePizza();
+    auto p = _ipcChildToParent->receivePizza();
+    _counter--;
+    _lastOrderTime = std::chrono::high_resolution_clock::now();
+    return p;
 }
 
 void Kitchen::putTheKeyUnderTheDoor()
 {
-    _process.kill();
+    _close = true;
 }
 
-void Kitchen::setProcess(Process process)
+void Kitchen::setProcess(Process *process)
 {
     _process = process;
 }
@@ -134,11 +129,6 @@ void Kitchen::openIpcs(bool isForked)
         _ipcChildToParent->open(InterProcessCom::OpenMode::READ);
         _ipcParentToChild->open(InterProcessCom::OpenMode::WRITE);
     }
-}
-
-const Process &Kitchen::getProcess() const
-{
-    return _process;
 }
 
 int Kitchen::getId() const

@@ -18,7 +18,7 @@ CXX = g++
 
 NAME = plazza
 
-CXXFLAGS = -Wall -Wextra -I ./include -std=c++20 -lpthread
+CXXFLAGS = -Wall -Wextra -I ./include -std=c++20 -lpthread -g
 
 all: $(NAME)
 
