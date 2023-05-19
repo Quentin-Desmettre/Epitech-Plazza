@@ -124,8 +124,8 @@ private:
     const int _cooks;
     const int _restockTimeMs;
 
-    bool _isCooking;
-    std::chrono::high_resolution_clock::time_point _timeoutClock;
+    std::chrono::high_resolution_clock::time_point _lastPizzaFinished;
+    Semaphore _pizzaCounter;
 
     std::unique_ptr<CookPool> _cookPool;
     Process _process;

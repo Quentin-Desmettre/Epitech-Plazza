@@ -104,11 +104,9 @@ void Reception::checkKitchen()
 std::unique_ptr<Kitchen> *Reception::getKitchen()
 {
     std::unique_ptr<Kitchen> *ref = &_kitchens.back();
-    //TODO: change la getPizzaAwaiting
     int actualSize = (*ref)->getCapacity() - (*ref)->getPizzasAwaiting();
 
     for (auto &kitchen : _kitchens) {
-        //TODO: change la getPizzaAwaiting
         int size = kitchen->getCapacity() - kitchen->getPizzasAwaiting();
         if (size < actualSize && !kitchen->isKitchenClosed())
             ref = &kitchen;
