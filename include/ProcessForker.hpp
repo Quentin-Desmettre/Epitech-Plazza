@@ -54,7 +54,7 @@ public:
     void join()
     {
         if (!_isRunnning)
-            throw std::runtime_error("Process not running");a
+            throw std::runtime_error("Process not running");
         waitpid(_pid, nullptr, 0);
         _isRunnning = false;
     }
