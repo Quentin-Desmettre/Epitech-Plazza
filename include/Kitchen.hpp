@@ -7,8 +7,16 @@
 
 #ifndef EPITECH_PLAZZA_KITCHEN_HPP
 #define EPITECH_PLAZZA_KITCHEN_HPP
+#include <thread>
 #include <memory>
+#include <chrono>
+#include <future>
+#include <chrono>
+#include <future>
+
+#include "ProcessForker.hpp"
 #include "ipc/PizzaIPC.hpp"
+#include "CookPool.hpp"
 
 /**
  * @brief Kitchen class
@@ -18,6 +26,7 @@
 class Kitchen {
 public:
     Kitchen(int cooks, int restockTimeMs, float multiplier);
+    ~Kitchen();
 
 ////////////////////////////////////////////////////////////////////////////////
 // Methods to be called from the forked process
@@ -36,7 +45,6 @@ public:
     void run();
 
     void checkForRefill();
-    void awaitFinishedCook();
 
     /**
      * @brief Waits for a command from the reception.
@@ -44,8 +52,6 @@ public:
      * Will call CookPool::addPizza
      */
     void awaitForCommand();
-
-    bool canCookPizza(const Pizza &pizza);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Methods to be called from the reception
@@ -73,16 +79,6 @@ public:
     void addPizza(const Pizza &pizza);
 
     /**
-     * @brief Check if a pizza has been sent by the forked process.
-     *
-     * It does this by trying to read to the internal IPC.
-     * @return true if there is enough data to read 1 pizza, else false.
-     */
-    bool hasPizzaFinished();
-
-    bool isKitchenClosed();
-
-    /**
      * @brief Returns a finished pizza. If no pizza is available, this call will be blocking.
      *
      * A successful call to this method will decrement the internal pizza counter.
@@ -92,17 +88,31 @@ public:
     Pizza getPizza();
 
     /**
-     * @brief Closes the kitchen.
+     * @brief Open ipcs.
      */
-    void putTheKeyUnderTheDoor();
-    void setPid(pid_t pid);
+    void openIpcs(bool isForked);
+
+    const InterProcessCom &getReadIpc() const;
+
+    int getId() const;
+
+    // Last order time
+    std::chrono::high_resolution_clock::time_point _lastOrderTime;
 
 private:
-    std::unique_ptr<PizzaIPC> _readIpc, _writeIpc;
+    std::unique_ptr<PizzaIPC> _ipcParentToChild, _ipcChildToParent;
     const float _multiplier;
     const int _cooks;
     const int _restockTimeMs;
-    pid_t _pid;
+
+    bool _isForked;
+
+    std::unique_ptr<CookPool> _cookPool;
+    std::mutex _ingredientsMutex;
+    int _pizzaCounter;
+
+    int _id;
+    static int _maxId;
 };
 
 

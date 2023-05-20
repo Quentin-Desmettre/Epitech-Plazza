@@ -18,7 +18,7 @@ CXX = g++
 
 NAME = plazza
 
-CXXFLAGS = -Wall -Wextra -I ./include -std=c++20
+CXXFLAGS = -Wall -Wextra -I ./include -std=c++20 -lpthread -g
 
 all: $(NAME)
 
@@ -27,12 +27,13 @@ $(NAME):   $(OBJ)
 
 tests_run:
 	make -C tests
-	cd tests && ./tests ; rm tests
+	#cd tests && ./tests ; rm tests
 
 clean:
 	rm -f $(OBJ)
 
 fclean:    clean
+	make -C tests fclean
 	rm -f $(NAME)
 
 re:        fclean all

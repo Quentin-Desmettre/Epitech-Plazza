@@ -9,61 +9,67 @@
 #define EPITECH_PLAZZA_COOKPOOL_HPP
 #include <queue>
 #include <semaphore>
+#include <condition_variable>
 #include "pizza/Pizza.hpp"
+#include <thread>
+#include "Semaphore.hpp"
+#include "pizza/PizzaQueue.hpp"
+
+class Kitchen;
 
 class CookPool {
 public:
     /**
      * @brief Creates a cook pool.
      *
-     * Launches a thread that will watch the queue for pizzas to cook.
-     * @param cooks
-     * @param multiplier
+     * Launches the cook threads, each one waiting on a semaphore.
+     * @param cooks The number of cooks.
+     * @param multiplier The multiplier to apply to the cooking time.
      */
-    CookPool(int cooks, float multiplier);
+    CookPool(int cooks, float multiplier, const Kitchen &kitchen);
 
     /**
-     * @brief Puts the requested pizza in a queue.
+     * @brief Puts the requested pizza in a queue, then post on the semaphore.
      */
-    void addPizza(const Pizza &pizza);
+    void addPizza(const Pizza& pizza);
 
     /**
-     * @brief Cooks a pizza.
+     * @brief The cook thread.
      *
-     * Waits the time needed to cook the pizza, depending on the multiplier.
-     * When this method has finished:
-     *  - sem_post
-     *  - add the pizza in the list of finished pizzas
-     *  - signal the conditional variable in the Kitchen.
+     * Each cook is represented by a thread, that runs this method.
+     * This method execute the following steps:
+     *  - Wait on the semaphore
+     *  - pop a pizza from the queue (because if it could wait on the semaphore, it means that there is a pizza to cook)
+     *  - wait the cooking time
+     *  - push the pizza in the finished pizzas list
+     *  - signals the conditional variable
      */
-    void cookPizza(const Pizza &pizza);
+    void cookThread();
 
     /**
      * @brief Returns the number of pizzas in cooking.
-     * @return _cooks - _cookSemaphore.size() + _queue.size()
+     * @return The number of pizzas in cooking.
      */
     int getPizzaInCooking() const;
 
-    /**
-     * @brief Clear the list of finished pizzas.
-     * @return A vector of cooked pizzas.
-     */
-    [[nodiscard]] std::vector<Pizza> clearFinishedPizzas();
+    using Ingredients = std::map<Pizza::Ingredient, Semaphore>;
+
+    Ingredients *getIngredients();
+
+    void consumeIngredients(const Pizza &pizza);
+
+    PizzaQueue &getFinishedPizzas();
 
 private:
-    /**
-     * @brief Watches the queue for pizzas to cook.
-     *
-     * If a pizza has to be cooked, tries to sem_wait on the cook semaphore,
-     * then launch a thread that will cook the pizza.
-     */
-    void watchQueue();
+    PizzaQueue _queue;
+    PizzaQueue _finishedPizzas;
+    std::vector<std::thread> _cookers;
 
-    std::queue<Pizza> _queue;
-    std::counting_semaphore<INT32_MAX> _cookSemaphore;
-    std::vector<Pizza> _finishedPizzas;
+    mutable ConditionalVariable<int> _pizzaInCooking;
     const int _cooks;
     const float _multiplier;
+    Ingredients _ingredients;
+    const Kitchen &_kitchen;
 };
 
 #endif //EPITECH_PLAZZA_COOKPOOL_HPP

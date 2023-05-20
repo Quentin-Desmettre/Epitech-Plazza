@@ -5,11 +5,18 @@
 ** main.c
 */
 
-#include <stdio.h>
-#include <semaphore>
-#include <thread>
+#include <string>
+#include <iostream>
+#include "Reception.hpp"
 
-int main()
+int main(int ac, char **av)
 {
-    std::counting_semaphore<1> sem(0);
+//    try {
+        Reception reception(ac, av);
+        reception.run();
+//    } catch (std::exception &e) {
+//        std::cout << e.what() << std::endl;
+//        return (84);
+//    }
+    return (0);
 }

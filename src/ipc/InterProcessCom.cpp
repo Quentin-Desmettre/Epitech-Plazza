@@ -9,27 +9,32 @@
 #include <random>
 #include <sys/stat.h>
 #include <stdexcept>
-#include <fcntl.h>
-#include <csignal>
-#include <algorithm>
 #include <sys/ioctl.h>
+#include <unistd.h>
+#include <cerrno>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <csignal>
+#include <fcntl.h>
+#include <cstring>
+#include "Kitchen.hpp"
 
 std::vector<std::string> InterProcessCom::_pipes;
 
 InterProcessCom::InterProcessCom(): _fd(-1)
 {
-    // First, find a random name for the named pipe.
+    // Find a random name for the pipe
     thread_local std::mt19937 generator(std::random_device{}());
     std::uniform_int_distribution<int> distribution(0, INT32_MAX);
     do {
         int random = distribution(generator);
-        _name = "/tmp/Plazza-fifo-" + std::to_string(random);
+        _name = "/tmp/Plazza-unix_socket-" + std::to_string(random);
     } while (std::find(_pipes.begin(), _pipes.end(), _name) != _pipes.end());
     _pipes.push_back(_name);
 
-    // Then, create and open the named pipe.
+    // Create named pipe
     if (mkfifo(_name.c_str(), 0666) == -1)
-        throw std::runtime_error("Cannot create named pipe");
+        throw std::runtime_error("Cannot create named pipe. Reason: " + std::string(std::strerror(errno)));
 }
 
 InterProcessCom::InterProcessCom(const InterProcessCom &other): _name(other._name), _fd(-1)
@@ -45,11 +50,13 @@ InterProcessCom::~InterProcessCom()
 void InterProcessCom::open(InterProcessCom::OpenMode mode)
 {
     if (_fd != -1)
-        ::close(_fd);
-    _fd = ::open(_name.c_str(), mode == READ ? O_RDONLY : O_WRONLY);
-    _mode = mode;
+        this->close();
+
+    // Open named pipe
+    _fd = ::open(_name.c_str(), mode == OpenMode::READ ? O_RDONLY : O_WRONLY);
     if (_fd == -1)
-        throw std::runtime_error("Cannot open named pipe");
+        throw std::runtime_error("Cannot open named pipe. Reason: " + std::string(std::strerror(errno)));
+    _mode = mode;
 }
 
 void InterProcessCom::close()
@@ -65,13 +72,23 @@ void InterProcessCom::write(const void *data, size_t size) const
     if (_fd == -1)
         return;
 
+    // Redirect sigpipe to avoid crashing the program
+    signal(SIGPIPE, &InterProcessCom::handleSigPipe);
+
+    // Write data
     std::size_t written = 0;
     while (written < size) {
         ssize_t ret = ::write(_fd, (char *)data + written, size - written);
-        if (ret == -1)
-            throw std::runtime_error("Cannot write to named pipe");
+        if (ret == -1) {
+            // Restore sigpipe
+            signal(SIGPIPE, SIG_DFL);
+            throw std::runtime_error("Cannot write to named pipe. Reason: " + std::string(std::strerror(errno)));
+        }
         written += ret;
     }
+
+    // Restore sigpipe
+    signal(SIGPIPE, SIG_DFL);
 }
 
 void InterProcessCom::read(void *data, size_t size) const
@@ -79,33 +96,89 @@ void InterProcessCom::read(void *data, size_t size) const
     if (_fd == -1)
         return;
 
+    // Redirect sigpipe to avoid crashing the program
+    signal(SIGPIPE, &InterProcessCom::handleSigPipe);
+
+    // Read data
     std::size_t read = 0;
     while (read < size) {
         ssize_t ret = ::read(_fd, (char *)data + read, size - read);
-        if (ret == -1)
-            throw std::runtime_error("Cannot read from named pipe");
+        if (ret <= 0) {
+            // Restore sigpipe
+            signal(SIGPIPE, SIG_DFL);
+            if (ret < 0)
+                throw std::runtime_error("Cannot read from named pipe. Reason: " + std::string(std::strerror(errno)));
+            throw PipeException();
+        }
         read += ret;
     }
+
+    // Restore sigpipe
+    signal(SIGPIPE, SIG_DFL);
 }
 
 int InterProcessCom::bytesAvailable() const
 {
-    if (_mode == WRITE)
-        return 0;
     int bytes = 0;
 
-    if (ioctl(_fd, FIONREAD, &bytes) == -1)
-        throw std::runtime_error("Cannot get number of bytes available in named pipe");
+    signal(SIGPIPE, &InterProcessCom::handleSigPipe);
+    if (ioctl(_fd, FIONREAD, &bytes) == -1) {
+        signal(SIGPIPE, SIG_DFL);
+        throw std::runtime_error("Cannot get number of bytes available of named pipe");
+    }
+    signal(SIGPIPE, SIG_DFL);
     return bytes;
 }
 
 void InterProcessCom::erasePipes()
 {
-    for (const std::string &pipe : _pipes)
-        unlink(pipe.c_str());
+    for (const std::string &socket : _pipes)
+        unlink(socket.c_str());
 }
 
 std::string InterProcessCom::getPipeName() const
 {
     return _name;
+}
+
+void InterProcessCom::handleSigPipe(int)
+{
+    std::cout << "sigpipe" << std::endl;
+    throw InterProcessCom::PipeException();
+}
+
+const std::unique_ptr<Kitchen> *InterProcessCom::waitForDataAvailable(InterProcessCom::InputSource &source, const std::vector<std::unique_ptr<Kitchen>> &kitchens)
+{
+    fd_set readfds;
+
+    // Create fd set
+    FD_ZERO(&readfds);
+    FD_SET(0, &readfds);
+    for (auto &kitchen : kitchens)
+        FD_SET(kitchen->getReadIpc()._fd, &readfds);
+
+    // Wait for data
+    if (select(FD_SETSIZE, &readfds, nullptr, nullptr, nullptr) == -1)
+        throw std::runtime_error("Cannot select. Reason: " + std::string(strerror(errno)));
+
+    // Return the kitchen that has data available
+    if (FD_ISSET(0, &readfds)) {
+        source = InputSource::STDIN;
+        return nullptr;
+    }
+    source = InputSource::KITCHEN;
+    for (auto &kitchen : kitchens)
+        if (FD_ISSET(kitchen->getReadIpc()._fd, &readfds))
+            return &kitchen;
+    return nullptr;
+}
+
+void InterProcessCom::waitForDataAvailable(const InterProcessCom &com)
+{
+    fd_set readfds;
+
+    FD_ZERO(&readfds);
+    FD_SET(com._fd, &readfds);
+    if (select(FD_SETSIZE, &readfds, nullptr, nullptr, nullptr) == -1)
+        throw std::runtime_error("Cannot select. Reason: " + std::string(strerror(errno)));
 }

@@ -33,6 +33,10 @@ public:
 
     bool hasPizza();
 
+    void notifyMessageReceived() const;
+
+    void waitForNotification() const;
+
 private:
     std::vector<char> _buffer;
 };

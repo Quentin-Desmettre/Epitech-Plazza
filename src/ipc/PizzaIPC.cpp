@@ -19,14 +19,16 @@ void PizzaIPC::sendPizza(const Pizza &pizza)
 
 Pizza PizzaIPC::receivePizza()
 {
-    if (_buffer.size() < sizeof(std::size_t))
-        throw std::runtime_error("Make sure PizzaIPC::hasPizza returns true before calling PizzaIPC::receivePizza");
+    // Get size
+    std::size_t size;
+    InterProcessCom::read(&size, sizeof(std::size_t));
+    // Get data
+    auto data = std::make_unique<char[]>(size);
+    InterProcessCom::read(data.get(), size);
 
-    std::vector<char> pizzaData;
-    std::size_t size = *reinterpret_cast<std::size_t *>(_buffer.data());
-    pizzaData.insert(pizzaData.end(), _buffer.begin() + sizeof(std::size_t), _buffer.end());
-    _buffer.erase(_buffer.begin(), _buffer.begin() + sizeof(std::size_t) + size);
-    return PizzaEncoder::unpack(pizzaData);
+    // Transform data to vector and unpack
+    std::vector<char> dataVector(data.get(), data.get() + size);
+    return PizzaEncoder::unpack(dataVector);
 }
 
 bool PizzaIPC::hasPizza()
@@ -48,4 +50,15 @@ bool PizzaIPC::hasPizza()
     if (_buffer.size() < sizeof(std::size_t) + size)
         return false;
     return true;
+}
+
+void PizzaIPC::notifyMessageReceived() const
+{
+    InterProcessCom::write("1", 1);
+}
+
+void PizzaIPC::waitForNotification() const
+{
+    char buffer;
+    InterProcessCom::read(&buffer, 1);
 }

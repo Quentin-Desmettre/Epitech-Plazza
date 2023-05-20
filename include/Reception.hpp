@@ -17,6 +17,7 @@
 #include "ipc/InterProcessCom.hpp"
 #include "pizza/Pizza.hpp"
 #include "Kitchen.hpp"
+#include "pizza/ParsePizza.hpp"
 
 /**
  * @brief Reception class
@@ -25,6 +26,7 @@
  * And handles the answers from the kitchen, and the timeout of kitchen
  */
 class Reception {
+public:
     Reception(int ac, char **av);
 
     /**
@@ -33,7 +35,10 @@ class Reception {
      * Steps:
      *  - check if there is data availabe on the std input
      *      => if so, parse user input
-     *  - for each kitchen, check if it has to close
+     *  - for each kitchen, check if it is doing something
+     *          if so, restart its clock
+     *          else, check if the clock > TIME_TO_DIE:
+     *              if so, kill the kitchen
      *  - for each kitchen, check if has a pizza cooked
      */
     void run();
@@ -45,12 +50,13 @@ class Reception {
      * @return Empty vector if there is a parse error, else the pizzas to cook.
      * @throws std::runtime_error If user pressed Ctrl+D
      */
-    std::vector<Pizza> getPizzasToCook() const;
+    std::vector<Pizza> getPizzasToCook();
 
 private:
-    const float _multiplier;
-    const int _cooksPerKitchen;
-    const int _restockTimeMs;
+    float _multiplier;
+    int _cooksPerKitchen;
+    int _restockTimeMs;
+    ParsePizza _parser;
 
     std::vector<std::unique_ptr<Kitchen>> _kitchens;
 
@@ -67,12 +73,17 @@ private:
      *      - add kitchen to the list
      * @return the created kitchen
      */
-    std::unique_ptr<Kitchen> addKitchen();
+    void addKitchen();
 
+
+    void checkKitchen();
+    void removeKitchen(Kitchen *kitchen);
+    std::unique_ptr<Kitchen> *getKitchen();
+    void checkOrderAndSendPizzas();
     /**
      * @brief Dispatches pizzas to the kitchens.
      */
-    void dispatchPizzas();
+    void dispatchPizzas(std::vector<Pizza> &pizzas);
 };
 
 #endif //EPITECH_PLAZZA_RECEPTION_HPP

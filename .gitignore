@@ -11,6 +11,7 @@ vgcore.*
 *.gcda
 *.gcno
 *.gcov
+cmake-build-debug
 
 # Compiled Object files
 *.slo
@@ -42,5 +43,9 @@ vgcore.*
 *.out
 *.app
 build
+
+#CLION
+cmake-build-debug
+CMakeLists.txt
 
 plazza
