@@ -10,6 +10,7 @@
 #include "logging/ILogger.hpp"
 #include "logging/CliLogger.hpp"
 #include <future>
+#include <algorithm>
 
 Reception::Reception(int ac, char **av)
 {
@@ -55,24 +56,25 @@ void Reception::run()
             continue;
         }
         auto kitchen = uniqueKitchen->get();
-        auto pizza = kitchen->getPizza();
-        ILogger::getLogger().logPizzaReceivedByReception(kitchen->getId(), pizza);
+        try {
+            auto pizza = kitchen->getPizza();
+            ILogger::getLogger().logPizzaReceivedByReception(kitchen->getId(), pizza);
+        } catch (InterProcessCom::PipeException &) {
+            removeKitchen(kitchen);
+        }
     }
-}
-
-void Reception::runKitchen(Kitchen *kitchen)
-{
-    kitchen->openIpcs(true);
-    kitchen->run();
 }
 
 void Reception::addKitchen()
 {
     std::unique_ptr<Kitchen> kitchen = std::make_unique<Kitchen>(_cooksPerKitchen, _restockTimeMs, _multiplier);
 
-    auto *process = new Process();
-    kitchen->setProcess(process);
-    process->runObject(this, &Reception::runKitchen, kitchen.get());
+    // Fork the kitchen process
+    Process::run([](Kitchen *kitchen) {
+        kitchen->openIpcs(true); // Open IPCs in forked mode
+        kitchen->run();
+    }, kitchen.get());
+    // Open IPCs in parent process
     kitchen->openIpcs(false);
 
     ILogger::getLogger().logKitchenCreated(kitchen->getId());
@@ -99,7 +101,7 @@ std::unique_ptr<Kitchen> *Reception::getKitchen()
 
     for (auto &kitchen : _kitchens) {
         int size = kitchen->getCapacity() - kitchen->getPizzasAwaiting();
-        if (size > 0 && size < actualSize && !kitchen->isKitchenClosed())
+        if (size > 0 && size < actualSize)
             ref = &kitchen;
     }
     if (actualSize <= 0) {
@@ -119,12 +121,31 @@ void Reception::checkOrderAndSendPizzas()
     dispatchPizzas(pizzas);
 }
 
+void Reception::removeKitchen(Kitchen *kitchen)
+{
+    auto it = std::find_if(_kitchens.begin(), _kitchens.end(), [kitchen](std::unique_ptr<Kitchen> &k) {
+        return k.get() == kitchen;
+    });
+
+    if (it == _kitchens.end())
+        return;
+    _kitchens.erase(it);
+}
+
 void Reception::dispatchPizzas(std::vector<Pizza> &pizzas)
 {
-    for (auto &pizza : pizzas) {
+    for (auto it = pizzas.begin(); it != pizzas.end(); it++) {
+        auto pizza = *it;
         checkKitchen();
         std::unique_ptr<Kitchen> *kitchen = getKitchen();
-        ILogger::getLogger().logPizzaSentToKitchen(kitchen->get()->getId(), pizza);
-        kitchen->get()->addPizza(pizza);
+        try {
+            kitchen->get()->addPizza(pizza);
+            const auto *readIpc = reinterpret_cast<const PizzaIPC *>(&kitchen->get()->getReadIpc());
+            readIpc->waitForNotification();
+            ILogger::getLogger().logPizzaSentToKitchen(kitchen->get()->getId(), pizza);
+        } catch (InterProcessCom::PipeException &) {
+            removeKitchen(kitchen->get());
+            it--;
+        }
     }
 }

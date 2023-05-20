@@ -52,12 +52,12 @@ bool PizzaIPC::hasPizza()
     return true;
 }
 
-void PizzaIPC::notifyMessageReceived()
+void PizzaIPC::notifyMessageReceived() const
 {
     InterProcessCom::write("1", 1);
 }
 
-void PizzaIPC::waitForNotification()
+void PizzaIPC::waitForNotification() const
 {
     char buffer;
     InterProcessCom::read(&buffer, 1);

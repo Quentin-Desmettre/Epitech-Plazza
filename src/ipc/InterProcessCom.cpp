@@ -103,10 +103,12 @@ void InterProcessCom::read(void *data, size_t size) const
     std::size_t read = 0;
     while (read < size) {
         ssize_t ret = ::read(_fd, (char *)data + read, size - read);
-        if (ret == -1) {
+        if (ret <= 0) {
             // Restore sigpipe
             signal(SIGPIPE, SIG_DFL);
-            throw std::runtime_error("Cannot read from named pipe. Reason: " + std::string(std::strerror(errno)));
+            if (ret < 0)
+                throw std::runtime_error("Cannot read from named pipe. Reason: " + std::string(std::strerror(errno)));
+            throw PipeException();
         }
         read += ret;
     }
@@ -141,6 +143,7 @@ std::string InterProcessCom::getPipeName() const
 
 void InterProcessCom::handleSigPipe(int)
 {
+    std::cout << "sigpipe" << std::endl;
     throw InterProcessCom::PipeException();
 }
 

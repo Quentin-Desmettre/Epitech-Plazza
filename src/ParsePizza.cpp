@@ -8,14 +8,14 @@
 #include "pizza/ParsePizza.hpp"
 #include "pizza/PizzaFactory.hpp"
 
-std::map<std::string, Pizza::PizzaType> ParsePizza::_pizzaTypeMap = {
+const std::map<std::string, Pizza::PizzaType> ParsePizza::_pizzaTypeMap = {
         {"regina", Pizza::PizzaType::Regina},
         {"margarita", Pizza::PizzaType::Margarita},
         {"americana", Pizza::PizzaType::Americana},
         {"fantasia", Pizza::PizzaType::Fantasia}
 };
 
-std::map<std::string, Pizza::PizzaSize> ParsePizza::_pizzaSizeMap = {
+const std::map<std::string, Pizza::PizzaSize> ParsePizza::_pizzaSizeMap = {
         {"S", Pizza::PizzaSize::S},
         {"M", Pizza::PizzaSize::M},
         {"L", Pizza::PizzaSize::L},
@@ -35,8 +35,8 @@ bool ParsePizza::CreatePizza(std::string &pizzaName, std::string &pizzaSize,
         return false;
     }
     std::transform(pizzaName.begin(), pizzaName.end(), pizzaName.begin(), ::tolower);
-    Pizza::PizzaType type = _pizzaTypeMap[pizzaName];
-    Pizza::PizzaSize size = _pizzaSizeMap[pizzaSize];
+    Pizza::PizzaType type = _pizzaTypeMap.at(pizzaName);
+    Pizza::PizzaSize size = _pizzaSizeMap.at(pizzaSize);
 
     for (int i = 0; i < number; i++) {
         _pizzas.push_back(PizzaFactory::createPizza(type, size));

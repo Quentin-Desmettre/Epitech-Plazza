@@ -16,8 +16,8 @@ Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) :
     _multiplier(multiplier),
     _cooks(cooks),
     _restockTimeMs(restockTimeMs),
-    _pizzaCounter(0),
-    _cookPool(nullptr)
+    _cookPool(nullptr),
+    _pizzaCounter(0)
 {
     _id = _maxId;
     _maxId++;
@@ -26,10 +26,7 @@ Kitchen::Kitchen(int cooks, int restockTimeMs, float multiplier) :
     _isForked = false;
 }
 
-Kitchen::~Kitchen()
-{
-    _process->kill();
-}
+Kitchen::~Kitchen() = default;
 
 void Kitchen::run()
 {
@@ -43,20 +40,20 @@ void Kitchen::run()
         ILogger::getLogger().logPizzaSentToReception(_id, pizza);
         _ipcChildToParent->sendPizza(pizza);
 
-        if (_cookPool->getPizzaInCooking() == 0) {
-            _lastOrderTime = std::chrono::high_resolution_clock::now();
-            std::thread(
-            [](Kitchen *kitchen) {
-                std::this_thread::sleep_for(std::chrono::seconds(5));
+        _lastOrderTime = std::chrono::high_resolution_clock::now();
+        if (_cookPool->getPizzaInCooking() != 0)
+            continue;
+        std::thread([this]() {
+            std::this_thread::sleep_for(std::chrono::seconds(5));
 
-                auto now = std::chrono::high_resolution_clock::now();
-                auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - kitchen->_lastOrderTime).count();
-                if (diff >= 4995 && kitchen->_pizzaCounter == 0) { // Error margin
-                    ILogger::getLogger().logKitchenClosed(kitchen->_id);
-                    kitchen->_process->kill();
-                }
-            }, this).detach();
-        }
+            auto now = std::chrono::high_resolution_clock::now();
+            auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastOrderTime).count();
+            if (diff >= 4995 && _pizzaCounter == 0) { // Error margin
+                _ingredientsMutex.lock();
+                ILogger::getLogger().logKitchenClosed(_id);
+                Process::exit();
+            }
+        }).detach();
     }
 }
 
@@ -67,9 +64,11 @@ void Kitchen::checkForRefill()
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(_restockTimeMs));
 
+        _ingredientsMutex.lock();
         for (auto &ingredient : *ingredients)
             ingredient.second.increment();
         ILogger::getLogger().logIngredientsStockUpdated(_id, *ingredients);
+        _ingredientsMutex.unlock();
     }
 }
 
@@ -79,6 +78,7 @@ void Kitchen::awaitForCommand()
         InterProcessCom::waitForDataAvailable(*_ipcParentToChild);
         Pizza pizza = _ipcParentToChild->receivePizza();
         _lastOrderTime = std::chrono::high_resolution_clock::now();
+        _ipcChildToParent->notifyMessageReceived();
         ILogger::getLogger().logPizzaReceivedByKitchen(_id, pizza);
         _cookPool->addPizza(pizza);
     }
@@ -98,41 +98,15 @@ int Kitchen::getCapacity() const
 
 void Kitchen::addPizza(const Pizza &pizza)
 {
-    _pizzaCounter++;
-    _lastOrderTime = std::chrono::high_resolution_clock::now();
     _ipcParentToChild->sendPizza(pizza);
-}
-
-bool Kitchen::hasPizzaFinished()
-{
-    return _ipcChildToParent->hasPizza();
-}
-
-bool Kitchen::isKitchenClosed()
-{
-    // TODO A CHECK
-    auto now = std::chrono::high_resolution_clock::now();
-    double elapsedTimeMS = std::chrono::duration<double, std::milli>(now - _lastOrderTime).count();
-
-    return elapsedTimeMS > 10000;
+    _pizzaCounter++;
 }
 
 Pizza Kitchen::getPizza()
 {
     auto p = _ipcChildToParent->receivePizza();
     _pizzaCounter--;
-    _lastOrderTime = std::chrono::high_resolution_clock::now();
     return p;
-}
-
-void Kitchen::putTheKeyUnderTheDoor()
-{
-    _close = true;
-}
-
-void Kitchen::setProcess(Process *process)
-{
-    _process = process;
 }
 
 void Kitchen::openIpcs(bool isForked)

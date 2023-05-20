@@ -22,6 +22,18 @@ const std::map<Pizza::PizzaSize, std::string> Pizza::_pizzaSizeToString = {
     {Pizza::XXL, "XXL"}
 };
 
+const std::map<Pizza::Ingredient, std::string> Pizza::_ingredientToString = {
+    {Pizza::Doe,        "Doe"},
+    {Pizza::Tomato,     "Tomato"},
+    {Pizza::Gruyere,    "Gruyere"},
+    {Pizza::Ham,        "Ham"},
+    {Pizza::Mushrooms,  "Mushrooms"},
+    {Pizza::Steak,      "Steak"},
+    {Pizza::Eggplant,   "Eggplant"},
+    {Pizza::GoatCheese, "GoatCheese"},
+    {Pizza::ChiefLove,  "ChiefLove"}
+};
+
 Pizza::Pizza(Pizza::PizzaType type, Pizza::PizzaSize size, float cookTime,
              const std::vector<Ingredient> &ingredients)
 {

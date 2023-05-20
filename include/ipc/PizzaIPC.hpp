@@ -33,9 +33,9 @@ public:
 
     bool hasPizza();
 
-    void notifyMessageReceived();
+    void notifyMessageReceived() const;
 
-    void waitForNotification();
+    void waitForNotification() const;
 
 private:
     std::vector<char> _buffer;

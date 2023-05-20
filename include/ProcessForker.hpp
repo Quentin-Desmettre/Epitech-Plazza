@@ -18,67 +18,40 @@
 
 class Process {
 public:
-    Process() {
-        _pid = -1;
-        _isRunnning = false;
-    }
 
     template<typename T, typename ... Args>
-    void run(T &&func, Args ...args)
+    static void run(T &&func, Args ...args)
     {
-        if (_isRunnning)
-            throw std::runtime_error("Process already running");
-        if ((_pid = fork()) == -1)
+        int pid;
+
+        if ((pid = fork()) == -1)
             throw std::runtime_error("fork() failed");
-        _isRunnning = true;
-        if (_pid == 0) {
+        if (pid == 0) {
             func(args...);
             exit(0);
         }
     }
 
     template<class Object, typename T, typename ... Args>
-    void runObject(Object *obj, T &&func, Args ...args)
+    static void runObject(Object *obj, T &&func, Args ...args)
     {
-        if (_isRunnning)
-            throw std::runtime_error("Process already running");
-        if ((_pid = fork()) == -1)
+        int pid;
+
+        if ((pid = fork()) == -1)
             throw std::runtime_error("fork() failed");
-        _isRunnning = true;
-        if (_pid == 0) {
+        if (pid == 0) {
             (obj->*func)(args...);
             exit(0);
         }
     }
 
-    void join()
+    static void exit(int status = 0)
     {
-        if (!_isRunnning)
-            throw std::runtime_error("Process not running");
-        waitpid(_pid, nullptr, 0);
-        _isRunnning = false;
-    }
-
-    void kill()
-    {
-        if (!_isRunnning)
-            return;
-//        ::kill(_pid, SIGKILL);
-        exit(0);
-        _isRunnning = false;
-    }
-
-    bool isRunning() const {
-        return _isRunnning;
-    }
-
-    pid_t getPid() const {
-        return _pid;
+        ::exit(status);
     }
 
 private:
-    pid_t _pid;
-    bool _isRunnning;
+    Process() = default;
 };
 
 #endif //EPITECH_PLAZZA_PROCESSFORKER_HPP

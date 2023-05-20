@@ -57,6 +57,8 @@ public:
     // Convert to string
     [[nodiscard]] std::string toString() const;
 
+    const static std::map<Ingredient, std::string> _ingredientToString;
+
 private:
     PizzaType _type;
     PizzaSize _size;

@@ -75,7 +75,7 @@ void CliLogger::logIngredientsStockUpdated(int kitchenId, const std::map<Pizza::
 {
     std::string msg = "Kitchen #" + std::to_string(kitchenId) + " ingredients stock updated: ";
     for (auto it = ingredients.begin(); it != ingredients.end(); ++it) {
-        msg += std::to_string(it->first) /*Pizza::ingredientToString(it->first)*/ + ": " + std::to_string(it->second.getValue());
+        msg += Pizza::_ingredientToString.at(it->first) + ": " + std::to_string(it->second.getValue());
         if (std::next(it) != ingredients.end())
             msg += ", ";
     }

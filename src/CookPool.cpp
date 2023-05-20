@@ -20,7 +20,7 @@ CookPool::CookPool(int cooks, float multiplier, const Kitchen &kitchen):
         _ingredients[Pizza::Ingredient(i)] = Semaphore(5);
 }
 
-void CookPool::addPizza(Pizza pizza)
+void CookPool::addPizza(const Pizza &pizza)
 {
     _queue.push(pizza);
 }

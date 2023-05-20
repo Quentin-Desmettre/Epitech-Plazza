@@ -74,10 +74,10 @@ private:
      * @return the created kitchen
      */
     void addKitchen();
-    void runKitchen(Kitchen *kitchen);
 
 
     void checkKitchen();
+    void removeKitchen(Kitchen *kitchen);
     std::unique_ptr<Kitchen> *getKitchen();
     void checkOrderAndSendPizzas();
     /**

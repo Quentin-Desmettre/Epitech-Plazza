@@ -31,7 +31,7 @@ public:
     /**
      * @brief Puts the requested pizza in a queue, then post on the semaphore.
      */
-    void addPizza(Pizza pizza);
+    void addPizza(const Pizza& pizza);
 
     /**
      * @brief The cook thread.

@@ -46,10 +46,6 @@ public:
 
     void checkForRefill();
 
-    void close() {
-        _process->kill();
-    }
-
     /**
      * @brief Waits for a command from the reception.
      *
@@ -83,20 +79,6 @@ public:
     void addPizza(const Pizza &pizza);
 
     /**
-     * @brief Check if a pizza has been sent by the forked process.
-     *
-     * It does this by trying to read to the internal IPC.
-     * @return true if there is enough data to read 1 pizza, else false.
-     */
-    bool hasPizzaFinished();
-
-    /**
-     * @brief
-     * @return
-     */
-    bool isKitchenClosed();
-
-    /**
      * @brief Returns a finished pizza. If no pizza is available, this call will be blocking.
      *
      * A successful call to this method will decrement the internal pizza counter.
@@ -106,12 +88,6 @@ public:
     Pizza getPizza();
 
     /**
-     * @brief Closes the kitchen.
-     */
-    void putTheKeyUnderTheDoor();
-    void setProcess(Process *process);
-
-    /**
      * @brief Open ipcs.
      */
     void openIpcs(bool isForked);
@@ -119,9 +95,6 @@ public:
     const InterProcessCom &getReadIpc() const;
 
     int getId() const;
-
-    bool _close = false;
-    int _pizzaCounter;
 
     // Last order time
     std::chrono::high_resolution_clock::time_point _lastOrderTime;
@@ -135,7 +108,8 @@ private:
     bool _isForked;
 
     std::unique_ptr<CookPool> _cookPool;
-    Process *_process;
+    std::mutex _ingredientsMutex;
+    int _pizzaCounter;
 
     int _id;
     static int _maxId;
