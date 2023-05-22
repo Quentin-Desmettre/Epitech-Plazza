@@ -27,7 +27,7 @@ $(NAME):   $(OBJ)
 
 tests_run:
 	make -C tests
-	#cd tests && ./tests ; rm tests
+	cd tests && ./tests ; rm tests
 
 clean:
 	rm -f $(OBJ)

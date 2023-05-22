@@ -9,6 +9,7 @@
 #include "logging/CliLogger.hpp"
 #include <fstream>
 #include <chrono>
+#include <iostream>
 
 TEST_CASE("clilogger")
 {
@@ -73,6 +74,5 @@ TEST_CASE("clilogger")
 
     // Ingredients stock updated
     std::getline(file, line);
-//    CHECK_EQ(line, "[" + std::string(buffer) + "] Ingredients stock updated: Doe=1 ChiefLove=2");
-    CHECK_EQ("[" + std::string(buffer) + "] Kitchen #1 ingredients stock updated: 0: 1, 8: 2", line);
+    CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 ingredients stock updated: Doe: 1, ChiefLove: 2");
 }
