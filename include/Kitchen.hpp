@@ -99,6 +99,9 @@ public:
 
     void printStatus() const;
 
+    void setProcess(Process process);
+    Process getProcess();
+
     // Last order time
     std::chrono::high_resolution_clock::time_point _lastOrderTime;
 
@@ -118,6 +121,8 @@ private:
 
     int _id;
     static int _maxId;
+
+    Process _process;
 };
 
 

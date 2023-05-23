@@ -18,11 +18,11 @@
 
 class Process {
 public:
-
+    Process(): _pid(INT32_MAX) {}
     template<typename T, typename ... Args>
-    static void run(T &&func, Args ...args)
+    static Process run(T &&func, Args ...args)
     {
-        int pid;
+        pid_t pid;
 
         if ((pid = fork()) == -1)
             throw std::runtime_error("fork() failed");
@@ -30,12 +30,13 @@ public:
             func(args...);
             exit(0);
         }
+        return Process(pid);
     }
 
     template<class Object, typename T, typename ... Args>
-    static void runObject(Object *obj, T &&func, Args ...args)
+    static Process runObject(Object *obj, T &&func, Args ...args)
     {
-        int pid;
+        pid_t pid;
 
         if ((pid = fork()) == -1)
             throw std::runtime_error("fork() failed");
@@ -43,6 +44,7 @@ public:
             (obj->*func)(args...);
             exit(0);
         }
+        return Process(pid);
     }
 
     static void exit(int status = 0)
@@ -50,8 +52,14 @@ public:
         ::exit(status);
     }
 
+    void kill() const {
+        ::kill(_pid, SIGKILL);
+        ::waitpid(_pid, nullptr, 0);
+    }
+
 private:
-    Process() = default;
+    explicit Process(pid_t pid) : _pid(pid) {}
+    pid_t _pid;
 };
 
 #endif //EPITECH_PLAZZA_PROCESSFORKER_HPP

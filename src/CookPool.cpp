@@ -12,8 +12,8 @@
 CookPool::CookPool(int cooks, float multiplier, const Kitchen &kitchen):
     _cooks(cooks), _multiplier(multiplier), _kitchen(kitchen)
 {
-    *_pizzaInCooking.wait() = 0;
-    _pizzaInCooking.signal();
+//    *_pizzaInCooking.wait() = 0;
+//    _pizzaInCooking.signal();
     for (int i = 0; i < _cooks; i++) {
         _cooksPizza[i + 1] = Pizza();
         _cookers.emplace_back(&CookPool::cookThread, this, i + 1);
