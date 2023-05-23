@@ -59,6 +59,13 @@ public:
 
     const static std::map<Ingredient, std::string> _ingredientToString;
 
+    bool operator==(const Pizza &rhs) const {
+        return _type == rhs._type &&
+               _size == rhs._size &&
+               _ingredients == rhs._ingredients &&
+               _cookTime == rhs._cookTime;
+    }
+
 private:
     PizzaType _type;
     PizzaSize _size;
