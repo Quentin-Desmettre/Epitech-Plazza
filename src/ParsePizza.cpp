@@ -30,11 +30,11 @@ bool ParsePizza::CreatePizza(std::string &pizzaName, std::string &pizzaSize,
     if (pizzaNumber[0] == 'x')
         number = std::stoi(pizzaNumber.substr(1, pizzaNumber.length() - 1));
 
+    std::transform(pizzaName.begin(), pizzaName.end(), pizzaName.begin(), ::tolower);
     if (_pizzaTypeMap.find(pizzaName) == _pizzaTypeMap.end()) {
         _pizzas.clear();
         return false;
     }
-    std::transform(pizzaName.begin(), pizzaName.end(), pizzaName.begin(), ::tolower);
     Pizza::PizzaType type = _pizzaTypeMap.at(pizzaName);
     Pizza::PizzaSize size = _pizzaSizeMap.at(pizzaSize);
 
