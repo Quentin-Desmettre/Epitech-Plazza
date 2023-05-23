@@ -65,9 +65,15 @@ void Kitchen::checkForRefill()
         std::this_thread::sleep_for(std::chrono::milliseconds(_restockTimeMs));
 
         _ingredientsMutex.lock();
-        for (auto &ingredient : *ingredients)
+        // If any of the ingredient is at 0, log the refill
+        bool logRefill = std::any_of(ingredients->begin(), ingredients->end(), [](auto &ingredient) {
+            return ingredient.second.getValue() == 0;
+        });
+        for (auto &ingredient : *ingredients) {
             ingredient.second.increment();
-        ILogger::getLogger().logIngredientsStockUpdated(_id, *ingredients);
+        }
+        if (logRefill)
+            ILogger::getLogger().logIngredientsStockUpdated(_id, *ingredients);
         _ingredientsMutex.unlock();
     }
 }
@@ -76,12 +82,31 @@ void Kitchen::awaitForCommand()
 {
     while (true) {
         InterProcessCom::waitForDataAvailable(*_ipcParentToChild);
-        Pizza pizza = _ipcParentToChild->receivePizza();
-        _lastOrderTime = std::chrono::high_resolution_clock::now();
-        _ipcChildToParent->notifyMessageReceived();
-        ILogger::getLogger().logPizzaReceivedByKitchen(_id, pizza);
-        _cookPool->addPizza(pizza);
+        auto type = _ipcParentToChild->getRequestType();
+        if (type == PizzaIPC::PIZZA) {
+            Pizza pizza = _ipcParentToChild->receivePizza();
+            _lastOrderTime = std::chrono::high_resolution_clock::now();
+            _ipcChildToParent->notifyMessageReceived();
+            ILogger::getLogger().logPizzaReceivedByKitchen(_id, pizza);
+            _cookPool->addPizza(pizza);
+        } else if (type == PizzaIPC::COOKS_OCCUPANCY) {
+            printCooksOccupancy();
+        }
     }
+}
+
+void Kitchen::printCooksOccupancy()
+{
+    std::cout << "Kitchen #" << _id << " status:" << std::endl;
+    std::cout << "\tPizza in cooking: " << _cookPool->getPizzaInCooking() << std::endl;
+    std::cout << "\tCooks occupancy:" << std::endl;
+    for (auto &[cookId, pizza] : _cookPool->getCooks())
+        std::cout << "\t\tCook #" << cookId << ":\t" << (pizza.getSize() != 0 ? pizza.toString() : "Free") << std::endl;
+    std::cout << "\tIngredient stock:" << std::endl;
+    for (auto &[ingredient, stock] : *_cookPool->getIngredients())
+        std::cout << "\t\t" << Pizza::_ingredientToString.at(ingredient) << ": " << stock.getValue() << std::endl;
+    std::cout << std::endl;
+    _ipcChildToParent->requestCooksOccupancy();
 }
 
 int Kitchen::getPizzasAwaiting() const
@@ -104,6 +129,7 @@ void Kitchen::addPizza(const Pizza &pizza)
 
 Pizza Kitchen::getPizza()
 {
+    _ipcChildToParent->getRequestType();
     auto p = _ipcChildToParent->receivePizza();
     _pizzaCounter--;
     return p;
@@ -131,4 +157,10 @@ const InterProcessCom &Kitchen::getReadIpc() const
     if (_isForked)
         return *_ipcParentToChild;
     return *_ipcChildToParent;
+}
+
+void Kitchen::printStatus() const
+{
+    _ipcParentToChild->requestCooksOccupancy();
+    _ipcChildToParent->getRequestType();
 }

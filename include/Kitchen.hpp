@@ -96,10 +96,14 @@ public:
 
     int getId() const;
 
+    void printStatus() const;
+
     // Last order time
     std::chrono::high_resolution_clock::time_point _lastOrderTime;
 
 private:
+    void printCooksOccupancy();
+
     std::unique_ptr<PizzaIPC> _ipcParentToChild, _ipcChildToParent;
     const float _multiplier;
     const int _cooks;

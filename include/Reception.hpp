@@ -50,7 +50,7 @@ public:
      * @return Empty vector if there is a parse error, else the pizzas to cook.
      * @throws std::runtime_error If user pressed Ctrl+D
      */
-    std::vector<Pizza> getPizzasToCook();
+    std::vector<Pizza> getPizzasToCook(bool &isOk);
 
 private:
     float _multiplier;

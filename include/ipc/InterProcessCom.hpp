@@ -70,8 +70,6 @@ public:
     static void waitForDataAvailable(const InterProcessCom &com);
 
 protected:
-    [[nodiscard]] int bytesAvailable() const;
-
     // List of every unix socket created, to delete them when the program exits.
     static std::vector<std::string> _pipes;
 
