@@ -8,7 +8,7 @@
 #include "ipc/PizzaIPC.hpp"
 #include "pizza/PizzaEncoder.hpp"
 #include <memory>
-
+#include <iostream>
 void PizzaIPC::sendPizza(const Pizza &pizza)
 {
     std::vector<char> data = PizzaEncoder::_2pac(pizza);
@@ -23,13 +23,18 @@ Pizza PizzaIPC::receivePizza()
 {
     // Get size
     std::size_t size;
+    std::cout << "ici" << std::endl;
     InterProcessCom::read(&size, sizeof(std::size_t));
+    std::cout << "ici1" << std::endl;
     // Get data
     auto data = std::make_unique<char[]>(size);
+    std::cout << "ici2" << std::endl;
     InterProcessCom::read(data.get(), size);
 
+    std::cout << "ici3" << std::endl;
     // Transform data to vector and unpack
     std::vector<char> dataVector(data.get(), data.get() + size);
+    std::cout << "ici4" << std::endl;
     return PizzaEncoder::unpack(dataVector);
 }
 

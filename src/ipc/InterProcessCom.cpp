@@ -98,15 +98,20 @@ void InterProcessCom::read(void *data, size_t size) const
         return;
 
     // Redirect sigpipe to avoid crashing the program
+    std::cout << "read" << std::endl;
     signal(SIGPIPE, &InterProcessCom::handleSigPipe);
 
+    std::cout << "read1" << std::endl;
     // Read data
     std::size_t read = 0;
+    std::cout << "read2" << std::endl;
     while (read < size) {
         ssize_t ret = ::read(_fd, (char *)data + read, size - read);
+        std::cout << "read3" << std::endl;
         if (ret <= 0) {
             // Restore sigpipe
             signal(SIGPIPE, SIG_DFL);
+            std::perror("read");
             if (ret < 0)
                 throw std::runtime_error("Cannot read from named pipe. Reason: " + std::string(std::strerror(errno)));
             throw PipeException();
@@ -114,6 +119,7 @@ void InterProcessCom::read(void *data, size_t size) const
         read += ret;
     }
 
+    std::cout << "read4" << std::endl;
     // Restore sigpipe
     signal(SIGPIPE, SIG_DFL);
 }

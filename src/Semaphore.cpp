@@ -9,20 +9,23 @@
 
 Semaphore::Semaphore(int value)
 {
-    #ifdef __APPLE__
-        _value = value;
-    #else
+#ifdef __APPLE__
+    if (value < 0)
+        throw std::runtime_error("sem_init failed");
+    _value = value;
+#else
     if (sem_init(&_sem, 0, value) == -1)
         throw std::runtime_error("sem_init failed");
-    #endif
+#endif
 }
 
 Semaphore::~Semaphore()
 {
-    #ifdef __APPLE__
-    #else
+#ifdef __APPLE__
+    _value = 0;
+#else
     sem_destroy(&_sem);
-    #endif
+#endif
 }
 
 void Semaphore::increment()

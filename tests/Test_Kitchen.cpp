@@ -17,17 +17,28 @@ TEST_CASE("Test_Kitchen")
     CHECK_EQ(kitchen2.getCapacity(), 8);
 }
 
-//TEST_CASE("Test_addPizza")
-//{
-//    Kitchen kitchen(2, 5, 1);
-//    Pizza pizza = Pizza(Pizza::PizzaType::Regina, Pizza::PizzaSize::S, 1, {Pizza::Ingredient::Doe, Pizza::Ingredient::Tomato});
-//
-//    kitchen.addPizza(pizza);
-//    CHECK_EQ(kitchen.getPizzasAwaiting(), 1);
-//
-//    kitchen.getPizza();
-//    CHECK_EQ(kitchen.getPizzasAwaiting(), 0);
-//}
+TEST_CASE("Test_addPizza")
+{
+    Kitchen kitchen(2, 5, 1);
+    int pid = fork();
+    if (pid == 0) {
+        kitchen.openIpcs(true);
+        kitchen.run();
+        exit(0);
+    }
+    kitchen.openIpcs(false);
+    Pizza pizza = Pizza(Pizza::PizzaType::Regina, Pizza::PizzaSize::S, 1, {Pizza::Ingredient::Doe, Pizza::Ingredient::Tomato});
+
+    kitchen.addPizza(pizza);
+    CHECK_EQ(kitchen.getPizzasAwaiting(), 1);
+
+    //try {
+    kitchen.getPizza();
+    CHECK_EQ(kitchen.getPizzasAwaiting(), 0);
+    //} catch (InterProcessCom::PipeException &) {
+    //    std::cerr << "kitchen closed" << std::endl;
+    //}
+}
 
 TEST_CASE("Test_IDS")
 {

@@ -130,9 +130,13 @@ void Kitchen::addPizza(const Pizza &pizza)
 
 Pizza Kitchen::getPizza()
 {
+    std::cout << "here" << std::endl;
     _ipcChildToParent->getRequestType();
+    std::cout << "here1" << std::endl;
     auto p = _ipcChildToParent->receivePizza();
+    std::cout << "here2" << std::endl;
     _pizzaCounter--;
+    std::cout << "here3" << std::endl;
     return p;
 }
 

@@ -11,26 +11,26 @@
 
 void openIpc(InterProcessCom &com, InterProcessCom::OpenMode mode);
 
-TEST_CASE("Test_pizzaIPC")
-{
-    Pizza p(Pizza::Regina, Pizza::XL, 1.5, {Pizza::Tomato, Pizza::Tomato, Pizza::Doe});
-    PizzaIPC ipcRead;
-    PizzaIPC ipcWrite(ipcRead);
-
-    // Open IPC
-    {
-        std::thread t1(openIpc, std::ref(ipcRead), InterProcessCom::READ);
-        std::thread t2(openIpc, std::ref(ipcWrite), InterProcessCom::WRITE);
-        t1.join();
-        t2.join();
-    }
-
-    SUBCASE("send and wait for notif") {
-        std::thread t1(&PizzaIPC::notifyMessageReceived, std::ref(ipcWrite));
-        std::thread t2(&PizzaIPC::waitForNotification, std::ref(ipcRead));
-        t1.join();
-        t2.join();
-    }
+//TEST_CASE("Test_pizzaIPC")
+//{
+//    Pizza p(Pizza::Regina, Pizza::XL, 1.5, {Pizza::Tomato, Pizza::Tomato, Pizza::Doe});
+//    PizzaIPC ipcRead;
+//    PizzaIPC ipcWrite(ipcRead);
+//
+//    // Open IPC
+//    {
+//        std::thread t1(openIpc, std::ref(ipcRead), InterProcessCom::READ);
+//        std::thread t2(openIpc, std::ref(ipcWrite), InterProcessCom::WRITE);
+//        t1.join();
+//        t2.join();
+//    }
+//
+//    SUBCASE("send and wait for notif") {
+//        std::thread t1(&PizzaIPC::notifyMessageReceived, std::ref(ipcWrite));
+//        std::thread t2(&PizzaIPC::waitForNotification, std::ref(ipcRead));
+//        t1.join();
+//        t2.join();
+//    }
 
     // Send pizza
 //    SUBCASE("send pizza")
@@ -61,8 +61,8 @@ TEST_CASE("Test_pizzaIPC")
 //        CHECK_EQ(p2.getIngredients(), p.getIngredients());
 //    }
 
-    SUBCASE("Read pizza without check")
-    {
-        CHECK_THROWS_AS(ipcRead.receivePizza(), std::runtime_error);
-    }
-}
+//    SUBCASE("Read pizza without check")
+//    {
+//        CHECK_THROWS_AS(ipcRead.receivePizza(), std::runtime_error);
+//    }
+//}

@@ -26,10 +26,11 @@ class Semaphore {
         int getValue() const;
 
     private:
-        sem_t _sem;
 
 #ifdef __APPLE__
         int _value;
+#else
+        sem_t _sem;
 #endif
 };
 
