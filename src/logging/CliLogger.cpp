@@ -7,6 +7,7 @@
 
 #include "logging/CliLogger.hpp"
 #include <chrono>
+#include <iostream>
 
 CliLogger::CliLogger()
 {
@@ -29,6 +30,7 @@ void CliLogger::log(const std::string &msg)
     *file << "[" << buffer << "] " << msg << std::endl;
     file->flush();
     _file.signal();
+    std::cout << "[" << buffer << "] " << msg << std::endl;
 }
 
 void CliLogger::logKitchenCreated(int id)

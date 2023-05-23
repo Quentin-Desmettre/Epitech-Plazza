@@ -35,9 +35,9 @@ std::vector<Pizza> Reception::getPizzasToCook()
     std::string pizzaName;
 
     if (!std::getline(std::cin, pizzaName))
-        throw std::runtime_error("User pressed Ctrl+D");
+        throw ErrorParsing("User pressed Ctrl+D");
     if (pizzaName == "exit")
-        throw std::runtime_error("User exited");
+        throw ErrorParsing("User exited");
     _parser.RunChecker(pizzaName);
     return _parser.GetPizzas();
 }
@@ -116,6 +116,11 @@ void Reception::checkOrderAndSendPizzas()
     std::vector<Pizza> pizzas = getPizzasToCook();
 
     if (pizzas.empty()) {
+        std::cerr << "Command Error" << std::endl;
+        return;
+    }
+    if (pizzas.size() > 1000) {
+        std::cerr << "Too many pizzas" << std::endl;
         return;
     }
     dispatchPizzas(pizzas);
