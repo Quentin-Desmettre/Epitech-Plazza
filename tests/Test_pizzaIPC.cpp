@@ -8,6 +8,7 @@
 #include "doctest.h"
 #include "ipc/PizzaIPC.hpp"
 #include <thread>
+#include <iostream>
 
 void openIpc(InterProcessCom &com, InterProcessCom::OpenMode mode);
 
@@ -33,36 +34,21 @@ TEST_CASE("Test_pizzaIPC")
     }
 
     // Send pizza
-//    SUBCASE("send pizza")
-//    {
-//        std::thread t1(sendPizza, std::ref(ipcWrite), p);
-//        Pizza p2;
-//        std::thread t2(readPizza, std::ref(ipcRead), std::ref(p2));
-//        t1.join();
-//        t2.join();
-//        CHECK_EQ(p2.getType(), p.getType());
-//        CHECK_EQ(p2.getSize(), p.getSize());
-//        CHECK_EQ(p2.getCookTime(), p.getCookTime());
-//        CHECK_EQ(p2.getIngredients(), p.getIngredients());
-//    }
-//
-//    SUBCASE("send pizza with delay")
-//    {
-//        Pizza p2;
-//        std::thread t2(readPizza, std::ref(ipcRead), std::ref(p2));
-//        // Sleep 1 second
-//        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-//        std::thread t1(sendPizza, std::ref(ipcWrite), p);
-//        t1.join();
-//        t2.join();
-//        CHECK_EQ(p2.getType(), p.getType());
-//        CHECK_EQ(p2.getSize(), p.getSize());
-//        CHECK_EQ(p2.getCookTime(), p.getCookTime());
-//        CHECK_EQ(p2.getIngredients(), p.getIngredients());
-//    }
-
-    SUBCASE("Read pizza without check")
+    SUBCASE("send pizza")
     {
-        CHECK_THROWS_AS(ipcRead.receivePizza(), std::runtime_error);
+        Pizza p2;
+        std::thread t1([](PizzaIPC &ipcRead, Pizza *p2) {
+            auto type = ipcRead.getRequestType();
+            *p2 = ipcRead.receivePizza();
+        }, std::ref(ipcRead), &p2);
+        std::thread t2(&PizzaIPC::sendPizza, std::ref(ipcWrite), p);
+
+        t1.join();
+        t2.join();
+        CHECK_EQ(p2.getType(), p.getType());
+        CHECK_EQ(p2.getSize(), p.getSize());
+        CHECK_EQ(p2.getCookTime(), p.getCookTime());
+        CHECK_EQ(p2.getIngredients(), p.getIngredients());
+        ipcWrite.requestCooksOccupancy();
     }
 }
