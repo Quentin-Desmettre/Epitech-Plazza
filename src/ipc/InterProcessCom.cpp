@@ -131,7 +131,6 @@ std::string InterProcessCom::getPipeName() const
 
 void InterProcessCom::handleSigPipe(int)
 {
-    std::cout << "sigpipe" << std::endl;
     throw InterProcessCom::PipeException();
 }
 

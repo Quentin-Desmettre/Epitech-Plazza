@@ -26,8 +26,12 @@ class Semaphore {
         int getValue() const;
 
     private:
+
+#ifdef __APPLE__
+        int _value;
+#else
         sem_t _sem;
-        std::string _name;
+#endif
 };
 
 

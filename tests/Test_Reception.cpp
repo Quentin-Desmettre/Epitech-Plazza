@@ -32,20 +32,20 @@ TEST_CASE("Test_ReceptionParser")
 
     std::string test = "regina XXL x2";
     CHECK_NOTHROW(parser.RunChecker(test));
-    CHECK(parser.GetPizzas().size() == 2);
+    CHECK_EQ(parser.GetPizzas().size(), 2);
 
     std::string test2 = "regina XXL x2; fantasia M x1";
     CHECK_NOTHROW(parser.RunChecker(test2));
-    CHECK(parser.GetPizzas().size() == 3);
+    CHECK_EQ(parser.GetPizzas().size(), 3);
 
     std::string test3 = "regina XXL x2; fantasia M x1; margarita S x1";
     CHECK_NOTHROW(parser.RunChecker(test3));
-    CHECK(parser.GetPizzas().size() == 4);
+    CHECK_EQ(parser.GetPizzas().size(), 4);
 
     std::string test4 = "regina XXL x2; ";
     CHECK_NOTHROW(parser.RunChecker(test4));
-    CHECK(parser.GetPizzas().size() == 0);
+    CHECK_EQ(parser.GetPizzas().size(), 0);
 
     std::string test5 = "exit";
-    CHECK_THROWS(parser.RunChecker(test5));
+    CHECK_EQ(parser.RunChecker(test5), false);
 }

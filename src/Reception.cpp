@@ -75,10 +75,10 @@ void Reception::addKitchen()
     std::unique_ptr<Kitchen> kitchen = std::make_unique<Kitchen>(_cooksPerKitchen, _restockTimeMs, _multiplier);
 
     // Fork the kitchen process
-    Process::run([](Kitchen *kitchen) {
+    kitchen->setProcess(Process::run([](Kitchen *kitchen) {
         kitchen->openIpcs(true); // Open IPCs in forked mode
         kitchen->run();
-    }, kitchen.get());
+    }, kitchen.get()));
     // Open IPCs in parent process
     kitchen->openIpcs(false);
 
@@ -141,6 +141,7 @@ void Reception::removeKitchen(Kitchen *kitchen)
 
     if (it == _kitchens.end())
         return;
+    kitchen->getProcess().kill();
     _kitchens.erase(it);
 }
 

@@ -165,3 +165,13 @@ void Kitchen::printStatus() const
     _ipcParentToChild->requestCooksOccupancy();
     _ipcChildToParent->getRequestType();
 }
+
+Process Kitchen::getProcess()
+{
+    return _process;
+}
+
+void Kitchen::setProcess(Process process)
+{
+    _process = process;
+}
