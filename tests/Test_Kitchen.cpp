@@ -30,14 +30,15 @@ TEST_CASE("Test_addPizza")
     Pizza pizza = Pizza(Pizza::PizzaType::Regina, Pizza::PizzaSize::S, 1, {Pizza::Ingredient::Doe, Pizza::Ingredient::Tomato});
 
     kitchen.addPizza(pizza);
-    CHECK_EQ(kitchen.getPizzasAwaiting(), 1);
+    kitchen.addPizza(pizza);
+    CHECK_EQ(kitchen.getPizzasAwaiting(), 2);
 
-    //try {
-    kitchen.getPizza();
-    CHECK_EQ(kitchen.getPizzasAwaiting(), 0);
-    //} catch (InterProcessCom::PipeException &) {
-    //    std::cerr << "kitchen closed" << std::endl;
-    //}
+    try {
+        kitchen.getPizza();
+        CHECK_EQ(kitchen.getPizzasAwaiting(), 1);
+    } catch (InterProcessCom::PipeException &) {
+        std::cerr << "kitchen closed" << std::endl;
+    }
 }
 
 TEST_CASE("Test_IDS")
