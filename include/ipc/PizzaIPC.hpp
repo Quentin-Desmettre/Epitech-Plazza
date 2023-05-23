@@ -12,6 +12,11 @@
 
 class PizzaIPC: public InterProcessCom {
 public:
+    enum RequestType {
+        COOKS_OCCUPANCY,
+        PIZZA,
+    };
+
     PizzaIPC() = default;
     ~PizzaIPC() = default;
 
@@ -31,11 +36,13 @@ public:
      */
     Pizza receivePizza();
 
-    bool hasPizza();
+    RequestType getRequestType();
 
     void notifyMessageReceived() const;
 
     void waitForNotification() const;
+
+    void requestCooksOccupancy() const;
 
 private:
     std::vector<char> _buffer;

@@ -14,6 +14,7 @@
 #include <cerrno>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <algorithm>
 #include <csignal>
 #include <fcntl.h>
 #include <cstring>
@@ -115,19 +116,6 @@ void InterProcessCom::read(void *data, size_t size) const
 
     // Restore sigpipe
     signal(SIGPIPE, SIG_DFL);
-}
-
-int InterProcessCom::bytesAvailable() const
-{
-    int bytes = 0;
-
-    signal(SIGPIPE, &InterProcessCom::handleSigPipe);
-    if (ioctl(_fd, FIONREAD, &bytes) == -1) {
-        signal(SIGPIPE, SIG_DFL);
-        throw std::runtime_error("Cannot get number of bytes available of named pipe");
-    }
-    signal(SIGPIPE, SIG_DFL);
-    return bytes;
 }
 
 void InterProcessCom::erasePipes()

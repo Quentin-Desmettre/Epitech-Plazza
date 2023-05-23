@@ -14,8 +14,10 @@ CookPool::CookPool(int cooks, float multiplier, const Kitchen &kitchen):
 {
     *_pizzaInCooking.wait() = 0;
     _pizzaInCooking.signal();
-    for (int i = 0; i < _cooks; i++)
-        _cookers.emplace_back(&CookPool::cookThread, this);
+    for (int i = 0; i < _cooks; i++) {
+        _cooksPizza[i + 1] = Pizza();
+        _cookers.emplace_back(&CookPool::cookThread, this, i + 1);
+    }
     for (int i = 0; i < Pizza::Ingredient::IngredientCount; i++)
         _ingredients[Pizza::Ingredient(i)] = Semaphore(5);
 }
@@ -25,13 +27,14 @@ void CookPool::addPizza(const Pizza &pizza)
     _queue.push(pizza);
 }
 
-void CookPool::cookThread()
+void CookPool::cookThread(int id)
 {
     while (true) {
 
         // Fetch a pizza
         auto pizza = _queue.pop();
         (*_pizzaInCooking.wait())++; // Increment the number of pizza in cooking
+        _cooksPizza[id] = pizza;
         _pizzaInCooking.signal();
 
         // Cook it
@@ -42,6 +45,7 @@ void CookPool::cookThread()
 
         // Push it in the queue
         (*_pizzaInCooking.wait())--;
+        _cooksPizza[id] = Pizza();
         _pizzaInCooking.signal();
         _finishedPizzas.push(pizza);
     }
@@ -69,3 +73,9 @@ PizzaQueue &CookPool::getFinishedPizzas()
 {
     return _finishedPizzas;
 }
+
+std::map<int, Pizza> CookPool::getCooks() const
+{
+    return _cooksPizza;
+}
+

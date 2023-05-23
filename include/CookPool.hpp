@@ -44,7 +44,7 @@ public:
      *  - push the pizza in the finished pizzas list
      *  - signals the conditional variable
      */
-    void cookThread();
+    void cookThread(int id);
 
     /**
      * @brief Returns the number of pizzas in cooking.
@@ -60,6 +60,8 @@ public:
 
     PizzaQueue &getFinishedPizzas();
 
+    std::map<int, Pizza> getCooks() const;
+
 private:
     PizzaQueue _queue;
     PizzaQueue _finishedPizzas;
@@ -70,6 +72,8 @@ private:
     const float _multiplier;
     Ingredients _ingredients;
     const Kitchen &_kitchen;
+
+    std::map<int, Pizza> _cooksPizza;
 };
 
 #endif //EPITECH_PLAZZA_COOKPOOL_HPP

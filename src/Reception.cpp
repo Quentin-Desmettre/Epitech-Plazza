@@ -30,14 +30,19 @@ Reception::Reception(int ac, char **av)
     ILogger::createLogger<CliLogger>();
 }
 
-std::vector<Pizza> Reception::getPizzasToCook()
+std::vector<Pizza> Reception::getPizzasToCook(bool &isOk)
 {
     std::string pizzaName;
 
     if (!std::getline(std::cin, pizzaName))
-        throw std::runtime_error("User pressed Ctrl+D");
+        throw ErrorParsing("User pressed Ctrl+D");
     if (pizzaName == "exit")
-        throw std::runtime_error("User exited");
+        throw ErrorParsing("User exited");
+    if (pizzaName == "status") {
+        isOk = true;
+        return {};
+    }
+    isOk = _parser.RunChecker(pizzaName);
     _parser.RunChecker(pizzaName);
     return _parser.GetPizzas();
 }
@@ -113,9 +118,16 @@ std::unique_ptr<Kitchen> *Reception::getKitchen()
 
 void Reception::checkOrderAndSendPizzas()
 {
-    std::vector<Pizza> pizzas = getPizzasToCook();
+    bool ok;
+    std::vector<Pizza> pizzas = getPizzasToCook(ok);
 
+    if (pizzas.empty() && ok) {
+        for (auto &kitchen : _kitchens)
+            kitchen->printStatus();
+        return;
+    }
     if (pizzas.empty()) {
+        std::cerr << "Command Error" << std::endl;
         return;
     }
     dispatchPizzas(pizzas);

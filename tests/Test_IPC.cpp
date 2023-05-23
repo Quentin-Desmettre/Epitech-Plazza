@@ -11,6 +11,7 @@
 #include <iostream>
 #include <thread>
 #include <unistd.h>
+#include "Kitchen.hpp"
 
 void openIpc(InterProcessCom &com, InterProcessCom::OpenMode mode)
 {
@@ -80,5 +81,31 @@ TEST_CASE("interProcessCom")
         InterProcessCom ipc3;
         unlink(ipc3.getPipeName().c_str());
         CHECK_THROWS_AS(ipc3.open(InterProcessCom::READ), std::runtime_error);
+    }
+
+    SUBCASE("Close write-end while reading") {
+        ipc2.close();
+        char buf;
+        CHECK_THROWS_AS(ipc.read(&buf, 1), InterProcessCom::PipeException);
+    }
+
+    SUBCASE("closed stdin") {
+        close(0);
+        InterProcessCom::InputSource source;
+        CHECK_THROWS_AS(InterProcessCom::waitForDataAvailable(source, {}), std::runtime_error);
+    }
+
+    SUBCASE("Multiple kitchens") {
+
+    }
+
+    SUBCASE("Wait for data available, on stdin") {
+        int fds[2];
+        pipe(fds);
+        dup2(fds[0], 0);
+        write(fds[1], "Hello World", 12);
+        InterProcessCom::InputSource source;
+        CHECK_EQ(InterProcessCom::waitForDataAvailable(source, {}), nullptr);
+        CHECK_EQ(source, InterProcessCom::InputSource::STDIN);
     }
 }

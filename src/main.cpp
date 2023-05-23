@@ -11,12 +11,15 @@
 
 int main(int ac, char **av)
 {
-//    try {
+    try {
         Reception reception(ac, av);
         reception.run();
-//    } catch (std::exception &e) {
-//        std::cout << e.what() << std::endl;
-//        return (84);
-//    }
+    } catch (Reception::ErrorParsing &e) {
+        std::cout << e.what() << std::endl;
+        return (0);
+    } catch (std::exception &e) {
+        std::cout << e.what() << std::endl;
+        return (84);
+    }
     return (0);
 }

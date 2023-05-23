@@ -31,4 +31,7 @@ TEST_CASE("semaphore")
         sem.decrement();
         CHECK_EQ(sem.getValue(), 61);
     }
+    SUBCASE("Invalid start value") {
+        CHECK_THROWS_AS(Semaphore(-1), std::runtime_error);
+    }
 }

@@ -13,6 +13,8 @@ void PizzaIPC::sendPizza(const Pizza &pizza)
 {
     std::vector<char> data = PizzaEncoder::_2pac(pizza);
     std::size_t size = data.size();
+    char type = static_cast<char>(RequestType::PIZZA);
+    InterProcessCom::write(&type, 1);
     InterProcessCom::write(&size, sizeof(std::size_t));
     InterProcessCom::write(data.data(), data.size());
 }
@@ -31,25 +33,11 @@ Pizza PizzaIPC::receivePizza()
     return PizzaEncoder::unpack(dataVector);
 }
 
-bool PizzaIPC::hasPizza()
+PizzaIPC::RequestType PizzaIPC::getRequestType()
 {
-    // Read all bytes
-    int bytesAvailable = InterProcessCom::bytesAvailable();
-    if (bytesAvailable > 0) {
-        auto data = std::make_unique<char[]>(bytesAvailable);
-        InterProcessCom::read(data.get(), bytesAvailable);
-        _buffer.insert(_buffer.end(), data.get(), data.get() + bytesAvailable);
-    }
-
-    // Check if there is enough bytes to read the size
-    if (_buffer.size() < sizeof(std::size_t))
-        return false;
-    std::size_t size = *reinterpret_cast<std::size_t *>(_buffer.data());
-
-    // Check if there is enough bytes to read the pizza
-    if (_buffer.size() < sizeof(std::size_t) + size)
-        return false;
-    return true;
+    char buffer;
+    InterProcessCom::read(&buffer, 1);
+    return static_cast<RequestType>(buffer);
 }
 
 void PizzaIPC::notifyMessageReceived() const
@@ -61,4 +49,10 @@ void PizzaIPC::waitForNotification() const
 {
     char buffer;
     InterProcessCom::read(&buffer, 1);
+}
+
+void PizzaIPC::requestCooksOccupancy() const
+{
+    char type = static_cast<char>(RequestType::COOKS_OCCUPANCY);
+    InterProcessCom::write(&type, 1);
 }

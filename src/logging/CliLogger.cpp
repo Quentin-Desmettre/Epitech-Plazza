@@ -7,6 +7,7 @@
 
 #include "logging/CliLogger.hpp"
 #include <chrono>
+#include <iostream>
 
 CliLogger::CliLogger()
 {
@@ -27,8 +28,10 @@ void CliLogger::log(const std::string &msg)
     // Write to file
     auto file = _file.wait();
     *file << "[" << buffer << "] " << msg << std::endl;
+    std::cout << "[" << buffer << "] " << msg << std::endl;
     file->flush();
     _file.signal();
+    std::cout << "[" << buffer << "] " << msg << std::endl;
 }
 
 void CliLogger::logKitchenCreated(int id)
@@ -43,7 +46,7 @@ void CliLogger::logKitchenClosed(int id)
 
 void CliLogger::logPizzaSentToKitchen(int kitchenId, const Pizza &pizza)
 {
-    log("Sent " + pizza.toString() + " to kitchen #" + std::to_string(kitchenId));
+//    log("Sent " + pizza.toString() + " to kitchen #" + std::to_string(kitchenId));
 }
 
 void CliLogger::logPizzaReceivedByKitchen(int kitchenId, const Pizza &pizza)
@@ -63,7 +66,7 @@ void CliLogger::logPizzaCooked(int kitchenId, const Pizza &pizza)
 
 void CliLogger::logPizzaSentToReception(int kitchenId, const Pizza &pizza)
 {
-    log("Kitchen #" + std::to_string(kitchenId) + " sent " + pizza.toString() + " to reception");
+//    log("Kitchen #" + std::to_string(kitchenId) + " sent " + pizza.toString() + " to reception");
 }
 
 void CliLogger::logPizzaReceivedByReception(int kitchenId, const Pizza &pizza)
