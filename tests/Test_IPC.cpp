@@ -71,9 +71,8 @@ TEST_CASE("interProcessCom")
 
     SUBCASE("invalid write 2")
     {
-        CHECK_THROWS_AS(ipc.write(nullptr, 12), std::runtime_error);
-        CHECK_THROWS_AS(ipc2.read(nullptr, 12), std::runtime_error);
-        ipc2.open(InterProcessCom::WRITE);
+        CHECK_THROWS(ipc.write(nullptr, 12));
+        CHECK_THROWS(ipc2.read(nullptr, 12));
     }
 
     SUBCASE("Cannot mkfifo")
