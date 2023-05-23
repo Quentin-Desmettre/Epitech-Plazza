@@ -8,6 +8,7 @@
 #ifndef EPITECH_PLAZZA_CONDITIONALVARIABLE_HPP
 #define EPITECH_PLAZZA_CONDITIONALVARIABLE_HPP
 #include "Semaphore.hpp"
+#include <mutex>
 
 template <typename T>
 class ConditionalVariable {

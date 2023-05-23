@@ -14,6 +14,7 @@
 #include <cerrno>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <algorithm>
 #include <csignal>
 #include <fcntl.h>
 #include <cstring>

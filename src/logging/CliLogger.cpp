@@ -31,6 +31,7 @@ void CliLogger::log(const std::string &msg)
     std::cout << "[" << buffer << "] " << msg << std::endl;
     file->flush();
     _file.signal();
+    std::cout << "[" << buffer << "] " << msg << std::endl;
 }
 
 void CliLogger::logKitchenCreated(int id)

@@ -29,6 +29,14 @@ class Reception {
 public:
     Reception(int ac, char **av);
 
+    class ErrorParsing : public std::exception {
+        public:
+            ErrorParsing(const std::string &message) : _message(message) {}
+            const char *what() const noexcept override { return _message.c_str(); }
+        private:
+            std::string _message;
+    };
+
     /**
      * @brief Runs the reception forever.
      *
