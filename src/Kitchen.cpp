@@ -38,7 +38,7 @@ void Kitchen::run()
     // Await finished pizzas and send them to reception
     while (true) {
         Pizza pizza = _cookPool->getFinishedPizzas().pop();
-        ILogger::getLogger().logPizzaSentToReception(_id, pizza);
+//        ILogger::getLogger().logPizzaSentToReception(_id, pizza);
         _ipcChildToParent->sendPizza(pizza);
 
         _lastOrderTime = std::chrono::high_resolution_clock::now();
@@ -51,7 +51,6 @@ void Kitchen::run()
             auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastOrderTime).count();
             if (diff >= 4995 && _pizzaCounter == 0) { // Error margin
                 _ingredientsMutex.lock();
-                ILogger::getLogger().logKitchenClosed(_id);
                 Process::exit();
             }
         }).detach();
@@ -88,7 +87,7 @@ void Kitchen::awaitForCommand()
             Pizza pizza = _ipcParentToChild->receivePizza();
             _lastOrderTime = std::chrono::high_resolution_clock::now();
             _ipcChildToParent->notifyMessageReceived();
-            ILogger::getLogger().logPizzaReceivedByKitchen(_id, pizza);
+//            ILogger::getLogger().logPizzaReceivedByKitchen(_id, pizza);
             _cookPool->addPizza(pizza);
         } else if (type == PizzaIPC::COOKS_OCCUPANCY) {
             printCooksOccupancy();

@@ -31,7 +31,6 @@ void CliLogger::log(const std::string &msg)
     std::cout << "[" << buffer << "] " << msg << std::endl;
     file->flush();
     _file.signal();
-    std::cout << "[" << buffer << "] " << msg << std::endl;
 }
 
 void CliLogger::logKitchenCreated(int id)
@@ -54,14 +53,14 @@ void CliLogger::logPizzaReceivedByKitchen(int kitchenId, const Pizza &pizza)
     log("Kitchen #" + std::to_string(kitchenId) + " received " + pizza.toString() + " from reception");
 }
 
-void CliLogger::logPizzaCookingStarted(int kitchenId, const Pizza &pizza)
+void CliLogger::logPizzaCookingStarted(int kitchenId, int cookId, const Pizza &pizza)
 {
-    log("Kitchen #" + std::to_string(kitchenId) + " started cooking " + pizza.toString());
+    log("Kitchen #" + std::to_string(kitchenId) + " started cooking " + pizza.toString() + " with cook #" + std::to_string(cookId));
 }
 
-void CliLogger::logPizzaCooked(int kitchenId, const Pizza &pizza)
+void CliLogger::logPizzaCooked(int kitchenId, int cookId, const Pizza &pizza)
 {
-    log("Kitchen #" + std::to_string(kitchenId) + " cooked " + pizza.toString());
+    log("Kitchen #" + std::to_string(kitchenId) + " cooked " + pizza.toString() + " with cook #" + std::to_string(cookId));
 }
 
 void CliLogger::logPizzaSentToReception(int kitchenId, const Pizza &pizza)

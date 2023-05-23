@@ -36,12 +36,12 @@ public:
     /**
      * @see ILogger::logPizzaCookingStarted
      */
-    void logPizzaCookingStarted(int kitchenId, const Pizza &pizza) override;
+    void logPizzaCookingStarted(int kitchenId, int cookId, const Pizza &pizza) override;
 
     /**
      * @see ILogger::logPizzaCooked
      */
-    void logPizzaCooked(int kitchenId, const Pizza &pizza) override;
+    void logPizzaCooked(int kitchenId, int cookId, const Pizza &pizza) override;
 
     /**
      * @see ILogger::logPizzaSentToReception

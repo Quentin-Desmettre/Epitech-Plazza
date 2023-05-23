@@ -79,9 +79,6 @@ protected:
     int _fd = -1;
 
     OpenMode _mode;
-
-private:
-    static void erasePipes() __attribute__((destructor));
 };
 
 #endif //EPITECH_PLAZZA_INTERPROCESSCOM_HPP

@@ -28,6 +28,7 @@
 class Reception {
 public:
     Reception(int ac, char **av);
+    ~Reception();
 
     class ErrorParsing : public std::exception {
         public:
@@ -67,6 +68,7 @@ private:
     ParsePizza _parser;
 
     std::vector<std::unique_ptr<Kitchen>> _kitchens;
+    std::vector<Pizza> _pizzasBuffer;
 
     /**
      * Creates a new kitchen.

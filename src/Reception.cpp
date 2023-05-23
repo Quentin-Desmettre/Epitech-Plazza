@@ -30,6 +30,12 @@ Reception::Reception(int ac, char **av)
     ILogger::createLogger<CliLogger>();
 }
 
+Reception::~Reception()
+{
+    for (auto &kitchen : _kitchens)
+        kitchen->getProcess().kill();
+}
+
 std::vector<Pizza> Reception::getPizzasToCook(bool &isOk)
 {
     std::string pizzaName;
@@ -106,8 +112,10 @@ std::unique_ptr<Kitchen> *Reception::getKitchen()
 
     for (auto &kitchen : _kitchens) {
         int size = kitchen->getCapacity() - kitchen->getPizzasAwaiting();
-        if (size > 0 && size < actualSize)
+        if (size > 0 && size < actualSize) {
             ref = &kitchen;
+            actualSize = size;
+        }
     }
     if (actualSize <= 0) {
         addKitchen();
@@ -122,6 +130,10 @@ void Reception::checkOrderAndSendPizzas()
     std::vector<Pizza> pizzas = getPizzasToCook(ok);
 
     if (pizzas.empty() && ok) {
+        if (_kitchens.empty()) {
+            std::cout << "No kitchen available" << std::endl;
+            return;
+        }
         for (auto &kitchen : _kitchens)
             kitchen->printStatus();
         return;
@@ -141,24 +153,33 @@ void Reception::removeKitchen(Kitchen *kitchen)
 
     if (it == _kitchens.end())
         return;
+    ILogger::getLogger().logKitchenClosed(kitchen->getId());
     kitchen->getProcess().kill();
     _kitchens.erase(it);
 }
 
 void Reception::dispatchPizzas(std::vector<Pizza> &pizzas)
 {
+    pizzas.insert(pizzas.end(), _pizzasBuffer.begin(), _pizzasBuffer.end());
+    _pizzasBuffer.clear();
     for (auto it = pizzas.begin(); it != pizzas.end(); it++) {
         auto pizza = *it;
         checkKitchen();
         std::unique_ptr<Kitchen> *kitchen = getKitchen();
+        if (_kitchens.size() > 450) {
+            std::cerr << "Too many open kitchens. Pizzas that are not dispatched are saved and will be placed during the next order (if possible)." << std::endl;
+            _pizzasBuffer.insert(_pizzasBuffer.end(), it, pizzas.end());
+            break;
+        }
         try {
             kitchen->get()->addPizza(pizza);
             const auto *readIpc = reinterpret_cast<const PizzaIPC *>(&kitchen->get()->getReadIpc());
             readIpc->waitForNotification();
-            ILogger::getLogger().logPizzaSentToKitchen(kitchen->get()->getId(), pizza);
+//            ILogger::getLogger().logPizzaSentToKitchen(kitchen->get()->getId(), pizza);
         } catch (InterProcessCom::PipeException &) {
             removeKitchen(kitchen->get());
             it--;
         }
     }
+    std::cerr << "Dispatched pizzas: " << pizzas.size() - _pizzasBuffer.size() << "/" << pizzas.size() << std::endl;
 }

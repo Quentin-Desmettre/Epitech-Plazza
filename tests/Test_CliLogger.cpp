@@ -32,8 +32,8 @@ TEST_CASE("clilogger")
     logger.logPizzaReceivedByKitchen(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
     logger.logPizzaSentToReception(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
     logger.logPizzaReceivedByReception(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
-    logger.logPizzaCookingStarted(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
-    logger.logPizzaCooked(1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
+    logger.logPizzaCookingStarted(1, 1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
+    logger.logPizzaCooked(1, 1, Pizza(Pizza::Regina, Pizza::S, 1, {}));
     logger.logIngredientsStockUpdated(1, {{Pizza::Doe, Semaphore(1)}, {Pizza::ChiefLove, Semaphore(2)}});
 
     // Get file content
@@ -66,11 +66,11 @@ TEST_CASE("clilogger")
 
     // Kitchen #1 started cooking Regina S
     std::getline(file, line);
-    CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 started cooking Regina S");
+    CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 started cooking Regina S with cook #1");
 
     // Kitchen #1 cooked Regina S
     std::getline(file, line);
-    CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 cooked Regina S");
+    CHECK_EQ(line, "[" + std::string(buffer) + "] Kitchen #1 cooked Regina S with cook #1");
 
     // Ingredients stock updated
     std::getline(file, line);

@@ -66,14 +66,14 @@ public:
      * @param kitchenId The id of the kitchen.
      * @param pizza The pizza cooked.
      */
-    virtual void logPizzaCookingStarted(int kitchenId, const Pizza &pizza) = 0;
+    virtual void logPizzaCookingStarted(int kitchenId, int cookId, const Pizza &pizza) = 0;
 
     /**
      * @brief Log the end of cooking of a pizza by a kitchen.
      * @param kitchenId The id of the kitchen.
      * @param pizza The pizza cooked.
      */
-    virtual void logPizzaCooked(int kitchenId, const Pizza &pizza) = 0;
+    virtual void logPizzaCooked(int kitchenId, int cookId, const Pizza &pizza) = 0;
 
     /**
      * @brief Log the sending of a pizza to the reception.

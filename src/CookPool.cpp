@@ -12,8 +12,8 @@
 CookPool::CookPool(int cooks, float multiplier, const Kitchen &kitchen):
     _cooks(cooks), _multiplier(multiplier), _kitchen(kitchen)
 {
-//    *_pizzaInCooking.wait() = 0;
-//    _pizzaInCooking.signal();
+    *_pizzaInCooking.wait() = 0;
+    _pizzaInCooking.signal();
     for (int i = 0; i < _cooks; i++) {
         _cooksPizza[i + 1] = Pizza();
         _cookers.emplace_back(&CookPool::cookThread, this, i + 1);
@@ -39,9 +39,9 @@ void CookPool::cookThread(int id)
 
         // Cook it
         consumeIngredients(pizza);
-        ILogger::getLogger().logPizzaCookingStarted(_kitchen.getId(), pizza);
+        ILogger::getLogger().logPizzaCookingStarted(_kitchen.getId(), id, pizza);
         std::this_thread::sleep_for(std::chrono::milliseconds((unsigned)(pizza.getCookTime() * _multiplier * 1000)));
-        ILogger::getLogger().logPizzaCooked(_kitchen.getId(), pizza);
+        ILogger::getLogger().logPizzaCooked(_kitchen.getId(), id, pizza);
 
         // Push it in the queue
         (*_pizzaInCooking.wait())--;

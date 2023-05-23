@@ -64,6 +64,7 @@ void InterProcessCom::close()
 {
     if (_fd == -1)
         return;
+    unlink(_name.c_str());
     ::close(_fd);
     _fd = -1;
 }
@@ -116,12 +117,6 @@ void InterProcessCom::read(void *data, size_t size) const
 
     // Restore sigpipe
     signal(SIGPIPE, SIG_DFL);
-}
-
-void InterProcessCom::erasePipes()
-{
-    for (const std::string &socket : _pipes)
-        unlink(socket.c_str());
 }
 
 std::string InterProcessCom::getPipeName() const
