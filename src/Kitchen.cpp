@@ -7,6 +7,7 @@
 
 #include "Kitchen.hpp"
 #include "logging/ILogger.hpp"
+#include <algorithm>
 
 int Kitchen::_maxId = 0;
 
