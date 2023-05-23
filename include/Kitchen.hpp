@@ -13,6 +13,7 @@
 #include <future>
 #include <chrono>
 #include <future>
+#include <algorithm>
 
 #include "ProcessForker.hpp"
 #include "ipc/PizzaIPC.hpp"
