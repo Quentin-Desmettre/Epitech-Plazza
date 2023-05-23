@@ -95,10 +95,13 @@ TEST_CASE("interProcessCom")
         CHECK_THROWS_AS(InterProcessCom::waitForDataAvailable(source, {}), std::runtime_error);
     }
 
-    SUBCASE("Multiple kitchens") {
-
+    SUBCASE("wait for data available, on IPC") {
+        ipc2.write("Hello World", 12);
+        InterProcessCom::waitForDataAvailable(ipc);
+        char buf[1024];
+        ipc.read(buf, 12);
+        CHECK_EQ(std::string(buf), "Hello World");
     }
-
     SUBCASE("Wait for data available, on stdin") {
         int fds[2];
         pipe(fds);

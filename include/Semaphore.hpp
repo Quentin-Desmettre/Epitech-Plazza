@@ -27,7 +27,10 @@ class Semaphore {
 
     private:
         sem_t _sem;
-        std::string _name;
+
+#ifdef __APPLE__
+        int _value;
+#endif
 };
 
 
