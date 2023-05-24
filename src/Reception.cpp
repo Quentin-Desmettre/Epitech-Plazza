@@ -111,7 +111,7 @@ std::unique_ptr<Kitchen> *Reception::getKitchen()
 
     for (auto &kitchen : _kitchens) {
         int size = kitchen->getCapacity() - kitchen->getPizzasAwaiting();
-        if (size > 0 && size < actualSize) {
+        if (size > 0 && size > actualSize) {
             ref = &kitchen;
             actualSize = size;
         }
