@@ -74,14 +74,16 @@ void ParsePizza::SplitInput(std::string &input)
 {
     std::string delimiter = "; ";
     size_t pos = input.find(delimiter);
-    std::string token = input.substr(0, pos);
+    std::string token;
 
-    _splitInput.push_back(token);
-    while ((pos = input.find(delimiter)) != std::string::npos) {
+    while (pos != std::string::npos) {
         token = input.substr(0, pos);
         _splitInput.push_back(token);
         input.erase(0, pos + delimiter.length());
+        pos = input.find(delimiter);
     }
+    token = input.substr(0, pos);
+    _splitInput.push_back(token);
 }
 
 std::vector<Pizza> ParsePizza::GetPizzas()
