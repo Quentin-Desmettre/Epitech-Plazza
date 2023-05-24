@@ -49,7 +49,6 @@ std::vector<Pizza> Reception::getPizzasToCook(bool &isOk)
         return {};
     }
     isOk = _parser.RunChecker(pizzaName);
-    _parser.RunChecker(pizzaName);
     return _parser.GetPizzas();
 }
 
